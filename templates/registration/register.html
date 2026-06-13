@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrace</title>
+</head>
+<body>
+    <h2>Vytvořit nový účet</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Zaregistrovat se</button>
+    </form>
+    <p>Již máte účet? <a href="{% url 'login' %}">Přihlaste se zde</a></p>
+</body>
+</html>
