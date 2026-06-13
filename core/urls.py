@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
-from budget.views import register
+from budget.views import register, dashboard
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,6 +28,6 @@ urlpatterns = [
     # Custom registration route
     path('accounts/register/', register, name='register'),
     
-    # A temporary landing page so the app doesn't crash before the dashboard is being built
-    path('', TemplateView.as_view(template_name='dashboard_temp.html'), name='dashboard'),
+    # A landing page for the dashboard
+    path('', dashboard, name='dashboard'),
 ]
