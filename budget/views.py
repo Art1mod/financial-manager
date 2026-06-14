@@ -34,6 +34,25 @@ def dashboard(request):
 
     current_balance = total_income - total_expense
 
+    # --- ACHIEVEMENT SUBSYSTEM ---
+    achievements = [
+        {
+            'title': 'První krok 🎉',
+            'desc': 'Zadej svou úplně první finanční transakci.',
+            'unlocked': user_transactions.count() > 0
+        },
+        {
+            'title': 'Velký střadatel 💰',
+            'desc': 'Dosáhni celkových příjmů přesahujících 5 000 Kč.',
+            'unlocked': total_income >= 5000
+        },
+        {
+            'title': 'Finanční kontrola ⚖️',
+            'desc': 'Udrž si kladnou aktuální bilanci (nejsi v mínusu).',
+            'unlocked': current_balance > 0
+        },
+    ]
+
     # --- TRANSACTION CREATION PROCESSOR ---
     if request.method == 'POST':
         form = TransactionForm(request.POST)
@@ -52,5 +71,6 @@ def dashboard(request):
         'total_expense': total_expense,
         'current_balance': current_balance,
         'form': form,
+        'achievements': achievements,
     }
     return render(request, 'dashboard.html', context)

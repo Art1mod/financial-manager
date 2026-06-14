@@ -38,6 +38,19 @@
             <h2 class="expense">- {{ total_expense }} Kč</h2>
         </div>
     </div>
+    <div class="card" style="margin-bottom: 30px;">
+        <h3>🏆 Moje Úspěchy (Milestones)</h3>
+        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+            {% for ach in achievements %}
+                <div style="padding: 15px; border: 2px solid {% if ach.unlocked %}#27ae60{% else %}#bdc3c7{% endif %}; background: {% if ach.unlocked %}#e8f8f5{% else %}#f4f6f7{% endif %}; border-radius: 6px; flex: 1; min-width: 200px;">
+                    <strong style="color: {% if ach.unlocked %}#27ae60{% else %}#7f8c8d{% endif %};">
+                        {% if ach.unlocked %}🔓{% else %}🔒{% endif %} {{ ach.title }}
+                    </strong>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #555;">{{ ach.desc }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 
     <div class="card">
         <h3>Přidat novou transakci</h3>
