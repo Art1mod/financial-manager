@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import TemplateView
-from budget.views import register, dashboard
+from budget.views import register, dashboard, add_transaction_ajax
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,4 +30,7 @@ urlpatterns = [
     
     # A landing page for the dashboard
     path('', dashboard, name='dashboard'),
+
+    # An AJAX target endpoint:
+    path('api/transaction/add/', add_transaction_ajax, name='add_transaction_ajax'),
 ]

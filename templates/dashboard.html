@@ -27,20 +27,20 @@
     <div class="summary-box">
         <div class="card">
             <h3>Aktuální bilance</h3>
-            <h2 class="balance">{{ current_balance }} Kč</h2>
+            <h2 class="balance" id="balance-display">{{ current_balance }} Kč</h2>
         </div>
         <div class="card">
             <h3>Celkové příjmy</h3>
-            <h2 class="income">+ {{ total_income }} Kč</h2>
+            <h2 class="income" id="income-display">+ {{ total_income }} Kč</h2>
         </div>
         <div class="card">
             <h3>Celkové výdaje</h3>
-            <h2 class="expense">- {{ total_expense }} Kč</h2>
+            <h2 class="expense" id="expense-display">- {{ total_expense }} Kč</h2>
         </div>
     </div>
     <div class="card" style="margin-bottom: 30px;">
         <h3>🏆 Moje Úspěchy (Milestones)</h3>
-        <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <div id="achievements-container" style="display: flex; gap: 15px; flex-wrap: wrap;">
             {% for ach in achievements %}
                 <div style="padding: 15px; border: 2px solid {% if ach.unlocked %}#27ae60{% else %}#bdc3c7{% endif %}; background: {% if ach.unlocked %}#e8f8f5{% else %}#f4f6f7{% endif %}; border-radius: 6px; flex: 1; min-width: 200px;">
                     <strong style="color: {% if ach.unlocked %}#27ae60{% else %}#7f8c8d{% endif %};">
@@ -54,7 +54,7 @@
 
     <div class="card">
         <h3>Přidat novou transakci</h3>
-        <form method="post">
+        <form method="post" id="transaction-form">
             {% csrf_token %}
             {{ form.as_p }}
             <button type="submit" style="background: #2980b9; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Uložit transakci</button>
@@ -72,7 +72,7 @@
                 <th>Popis</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="transaction-table-body">
             {% for tx in transactions %}
             <tr>
                 <td>{{ tx.date|date:"d. m. Y" }}</td>
@@ -95,5 +95,93 @@
         </tbody>
     </table>
 
+<script>
+document.getElementById('transaction-form').addEventListener('submit', function(e) {
+    // Stop the standard browser form submission and page reloading behavior
+    e.preventDefault();
+
+    const form = this;
+    const formData = new FormData(form);
+
+    // Read the CSRF protection cookie safely natively
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // Execute background Fetch pipeline API
+    fetch("{% url 'add_transaction_ajax' %}", {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRFToken": csrftoken
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // 1. UPDATE CARD METRICS
+            document.getElementById('balance-display').innerText = data.metrics.current_balance + ' Kč';
+            document.getElementById('income-display').innerText = '+ ' + data.metrics.total_income + ' Kč';
+            document.getElementById('expense-display').innerText = '- ' + data.metrics.total_expense + ' Kč';
+
+            // 2. INJECT NEW TRANSACTION ROW AT THE TOP OF THE TABLE
+            const tbody = document.getElementById('transaction-table-body');
+            
+            // If the "Zatím zde nejsou žádné transakce" placeholder text exists, clear it out first
+            if (tbody.rows.length === 1 && tbody.rows[0].cells.length === 1) {
+                tbody.innerHTML = '';
+            }
+
+            const typeLabel = data.transaction.type === 'INCOME' ? '<span class="income">Příjem</span>' : '<span class="expense">Výdaj</span>';
+            
+            const newRow = `
+                <tr>
+                    <td>${data.transaction.date}</td>
+                    <td>${typeLabel}</td>
+                    <td><strong>${data.transaction.amount} Kč</strong></td>
+                    <td>${data.transaction.category}</td>
+                    <td>${data.transaction.description}</td>
+                </tr>
+            `;
+            // Insert it elegantly as the first row in the log table
+            tbody.insertAdjacentHTML('afterbegin', newRow);
+
+            // 3. DYNAMICALLY UPDATE VISUAL ACHIEVEMENTS RENDER
+            const achContainer = document.getElementById('achievements-container');
+            let achHtml = '';
+            
+            // Map descriptions dynamically to match backend data states
+            const descriptions = {
+                'První krok 🎉': 'Zadej svou úplně první finanční transakci.',
+                'Velký střadatel 💰': 'Dosáhni celkových příjmů přesahujících 5 000 Kč.',
+                'Finanční kontrola ⚖️': 'Udrž si kladnou aktuální bilanci (nejsi v mínusu).'
+            };
+
+            data.achievements.forEach(ach => {
+                const borderColor = ach.unlocked ? '#27ae60' : '#bdc3c7';
+                const bgColor = ach.unlocked ? '#e8f8f5' : '#f4f6f7';
+                const textColor = ach.unlocked ? '#27ae60' : '#7f8c8d';
+                const icon = ach.unlocked ? '🔓' : '🔒';
+                const descText = descriptions[ach.title] || '';
+
+                achHtml += `
+                    <div style="padding: 15px; border: 2px solid ${borderColor}; background: ${bgColor}; border-radius: 6px; flex: 1; min-width: 200px;">
+                        <strong style="color: ${textColor};">${icon} ${ach.title}</strong>
+                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #555;">${descText}</p>
+                    </div>
+                `;
+            });
+            achContainer.innerHTML = achHtml;
+
+            // 4. RESET THE INPUT BOXES NATIVELY
+            form.reset();
+        } else {
+            alert('Chyba při ukládání transakce: ' + JSON.stringify(data.errors));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Něco se pokazilo na serverové vrstvě.');
+    });
+});
+</script>
 </body>
 </html>

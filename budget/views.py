@@ -4,6 +4,8 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from .models import Transaction
 from .forms import TransactionForm
+from django.http import JsonResponse
+from django.utils.formats import date_format
 
 def register(request):
     if request.method == 'POST':
@@ -74,3 +76,48 @@ def dashboard(request):
         'achievements': achievements,
     }
     return render(request, 'dashboard.html', context)
+
+@login_required
+def add_transaction_ajax(request):
+    if request.method == 'POST':
+        form = TransactionForm(request.POST)
+        if form.is_valid():
+            transaction = form.save(commit=False)
+            transaction.user = request.user
+            transaction.save()
+            
+            # --- RE-CALCULATE AGGREGATES FOR AJAX RESPONSE ---
+            user_transactions = Transaction.objects.filter(user=request.user)
+            total_income = sum(tx.amount for tx in user_transactions if tx.transaction_type == 'INCOME')
+            total_expense = sum(tx.amount for tx in user_transactions if tx.transaction_type == 'EXPENSE')
+            current_balance = total_income - total_expense
+
+            # Dynamic achievement check
+            achievements = [
+                {'title': 'První krok 🎉', 'unlocked': user_transactions.count() > 0},
+                {'title': 'Velký střadatel 💰', 'unlocked': total_income >= 5000},
+                {'title': 'Finanční kontrola ⚖️', 'unlocked': current_balance > 0},
+            ]
+
+            # Return success packet
+            return JsonResponse({
+                'status': 'success',
+                'transaction': {
+                    'date': transaction.date.strftime('%d. %m. %Y'),
+                    'type': transaction.transaction_type,
+                    'amount': str(transaction.amount),
+                    'category': transaction.get_category_display(),
+                    'description': transaction.description or '',
+                },
+                'metrics': {
+                    'total_income': str(total_income),
+                    'total_expense': str(total_expense),
+                    'current_balance': str(current_balance),
+                },
+                'achievements': achievements
+            })
+        else:
+            # Send back validation errors if user typed bad data
+            return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
