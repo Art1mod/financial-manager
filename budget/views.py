@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from .models import Transaction
+from .models import Transaction, Achievement, UserAchievement
 from .forms import TransactionForm
 from django.http import JsonResponse
 from django.utils.formats import date_format
@@ -37,23 +37,18 @@ def dashboard(request):
     current_balance = total_income - total_expense
 
     # --- ACHIEVEMENT SUBSYSTEM ---
-    achievements = [
-        {
-            'title': 'První krok 🎉',
-            'desc': 'Zadej svou úplně první finanční transakci.',
-            'unlocked': user_transactions.count() > 0
-        },
-        {
-            'title': 'Velký střadatel 💰',
-            'desc': 'Dosáhni celkových příjmů přesahujících 5 000 Kč.',
-            'unlocked': total_income >= 5000
-        },
-        {
-            'title': 'Finanční kontrola ⚖️',
-            'desc': 'Udrž si kladnou aktuální bilanci (nejsi v mínusu).',
-            'unlocked': current_balance > 0
-        },
-    ]
+    all_achievements = Achievement.objects.all()
+    
+    # Get a list of badge_codes that this specific user has unlocked
+    unlocked_badges = UserAchievement.objects.filter(user=request.user).values_list('achievement__badge_code', flat=True)
+    
+    achievements_context = []
+    for ach in all_achievements:
+        achievements_context.append({
+            'title': ach.title,
+            'desc': ach.description,
+            'unlocked': ach.badge_code in unlocked_badges
+        })
 
     # --- TRANSACTION CREATION PROCESSOR ---
     if request.method == 'POST':
@@ -73,7 +68,7 @@ def dashboard(request):
         'total_expense': total_expense,
         'current_balance': current_balance,
         'form': form,
-        'achievements': achievements,
+        'achievements': achievements_context,
     }
     return render(request, 'dashboard.html', context)
 
@@ -84,7 +79,7 @@ def add_transaction_ajax(request):
         if form.is_valid():
             transaction = form.save(commit=False)
             transaction.user = request.user
-            transaction.save()
+            transaction.save() # This triggers the signal in signals.py automatically
             
             # --- RE-CALCULATE AGGREGATES FOR AJAX RESPONSE ---
             user_transactions = Transaction.objects.filter(user=request.user)
@@ -92,12 +87,17 @@ def add_transaction_ajax(request):
             total_expense = sum(tx.amount for tx in user_transactions if tx.transaction_type == 'EXPENSE')
             current_balance = total_income - total_expense
 
-            # Dynamic achievement check
-            achievements = [
-                {'title': 'První krok 🎉', 'unlocked': user_transactions.count() > 0},
-                {'title': 'Velký střadatel 💰', 'unlocked': total_income >= 5000},
-                {'title': 'Finanční kontrola ⚖️', 'unlocked': current_balance > 0},
-            ]
+            # --- DYNAMIC ACHIEVEMENT CHECK (DATABASE BACKED FOR AJAX) ---
+            all_achievements = Achievement.objects.all()
+            unlocked_badges = UserAchievement.objects.filter(user=request.user).values_list('achievement__badge_code', flat=True)
+
+            achievements_ajax = []
+            for ach in all_achievements:
+                achievements_ajax.append({
+                    'title': ach.title,
+                    'desc': ach.description,  
+                    'unlocked': ach.badge_code in unlocked_badges
+                })
 
             # Return success packet
             return JsonResponse({
@@ -114,7 +114,7 @@ def add_transaction_ajax(request):
                     'total_expense': str(total_expense),
                     'current_balance': str(current_balance),
                 },
-                'achievements': achievements
+                'achievements': achievements_ajax
             })
         else:
             # Send back validation errors if user typed bad data

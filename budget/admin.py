@@ -1,3 +1,6 @@
 from django.contrib import admin
+from .models import Transaction, Achievement, UserAchievement
 
-# Register your models here.
+admin.site.register(Transaction)
+admin.site.register(Achievement)
+admin.site.register(UserAchievement)# Register your models here.

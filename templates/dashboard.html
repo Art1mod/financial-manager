@@ -38,19 +38,25 @@
             <h2 class="expense" id="expense-display">- {{ total_expense }} Kč</h2>
         </div>
     </div>
-    <div class="card" style="margin-bottom: 30px;">
-        <h3>🏆 Moje Úspěchy (Milestones)</h3>
-        <div id="achievements-container" style="display: flex; gap: 15px; flex-wrap: wrap;">
-            {% for ach in achievements %}
-                <div style="padding: 15px; border: 2px solid {% if ach.unlocked %}#27ae60{% else %}#bdc3c7{% endif %}; background: {% if ach.unlocked %}#e8f8f5{% else %}#f4f6f7{% endif %}; border-radius: 6px; flex: 1; min-width: 200px;">
-                    <strong style="color: {% if ach.unlocked %}#27ae60{% else %}#7f8c8d{% endif %};">
-                        {% if ach.unlocked %}🔓{% else %}🔒{% endif %} {{ ach.title }}
-                    </strong>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #555;">{{ ach.desc }}</p>
-                </div>
-            {% endfor %}
-        </div>
+    <div class="achievements-container">
+    <h3>🏆 Moje Úspěchy (Milestones)</h3>
+    <div class="achievements-grid" style="display: flex; gap: 20px; margin-bottom: 20px;">
+        {% for ach in achievements %}
+            <div class="achievement-card {% if ach.unlocked %}unlocked{% else %}locked{% endif %}" 
+                 style="border: 1px solid {% if ach.unlocked %}#28a745{% else %}#ccc{% endif %}; 
+                        background-color: {% if ach.unlocked %}#e8f5e9{% else %}#f8f9fa{% endif %}; 
+                        padding: 15px; border-radius: 5px; flex: 1; opacity: {% if ach.unlocked %}1{% else %}0.6{% endif %};">
+                <h4>
+                    {% if ach.unlocked %}🔓{% else %}🔒{% endif %} 
+                    {{ ach.title }}
+                </h4>
+                <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #555;">{{ ach.desc }}</p>
+            </div>
+        {% empty %}
+            <p>Žádné milníky nebyly v administraci nalezeny.</p>
+        {% endfor %}
     </div>
+</div>
 
     <div class="card">
         <h3>Přidat novou transakci</h3>
@@ -125,7 +131,7 @@ document.getElementById('transaction-form').addEventListener('submit', function(
             // 2. INJECT NEW TRANSACTION ROW AT THE TOP OF THE TABLE
             const tbody = document.getElementById('transaction-table-body');
             
-            // If the "Zatím zde nejsou žádné transakce" placeholder text exists, clear it out first
+            // If the placeholder text exists, clear it out first
             if (tbody.rows.length === 1 && tbody.rows[0].cells.length === 1) {
                 tbody.innerHTML = '';
             }
@@ -144,32 +150,33 @@ document.getElementById('transaction-form').addEventListener('submit', function(
             // Insert it elegantly as the first row in the log table
             tbody.insertAdjacentHTML('afterbegin', newRow);
 
-            // 3. DYNAMICALLY UPDATE VISUAL ACHIEVEMENTS RENDER
-            const achContainer = document.getElementById('achievements-container');
-            let achHtml = '';
-            
-            // Map descriptions dynamically to match backend data states
-            const descriptions = {
-                'První krok 🎉': 'Zadej svou úplně první finanční transakci.',
-                'Velký střadatel 💰': 'Dosáhni celkových příjmů přesahujících 5 000 Kč.',
-                'Finanční kontrola ⚖️': 'Udrž si kladnou aktuální bilanci (nejsi v mínusu).'
-            };
+            // 3. DYNAMICALLY UPDATE VISUAL ACHIEVEMENTS VIA DOM MANIPULATION
+            // We target the inner grid directly, leaving the h3 title intact
+            const achGrid = document.querySelector('.achievements-grid');
+            if (achGrid) {
+                let achHtml = '';
+                
+                data.achievements.forEach(ach => {
+                    // Match the look of the initial Django HTML template loops exactly
+                    const borderColor = ach.unlocked ? '#28a745' : '#ccc';
+                    const bgColor = ach.unlocked ? '#e8f5e9' : '#f8f9fa';
+                    const opacity = ach.unlocked ? '1' : '0.6';
+                    const lockIcon = ach.unlocked ? '🔓' : '🔒';
 
-            data.achievements.forEach(ach => {
-                const borderColor = ach.unlocked ? '#27ae60' : '#bdc3c7';
-                const bgColor = ach.unlocked ? '#e8f8f5' : '#f4f6f7';
-                const textColor = ach.unlocked ? '#27ae60' : '#7f8c8d';
-                const icon = ach.unlocked ? '🔓' : '🔒';
-                const descText = descriptions[ach.title] || '';
-
-                achHtml += `
-                    <div style="padding: 15px; border: 2px solid ${borderColor}; background: ${bgColor}; border-radius: 6px; flex: 1; min-width: 200px;">
-                        <strong style="color: ${textColor};">${icon} ${ach.title}</strong>
-                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #555;">${descText}</p>
-                    </div>
-                `;
-            });
-            achContainer.innerHTML = achHtml;
+                    achHtml += `
+                        <div class="achievement-card ${ach.unlocked ? 'unlocked' : 'locked'}" 
+                             style="border: 1px solid ${borderColor}; 
+                                    background-color: ${bgColor}; 
+                                    padding: 15px; border-radius: 5px; flex: 1; opacity: ${opacity};">
+                            <h4>
+                                ${lockIcon} ${ach.title}
+                            </h4>
+                            <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #555;">${ach.desc || ''}</p>
+                        </div>
+                    `;
+                });
+                achGrid.innerHTML = achHtml;
+            }
 
             // 4. RESET THE INPUT BOXES NATIVELY
             form.reset();
