@@ -1,16 +1,25 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
     <title>Přihlášení</title>
+    <link rel="stylesheet" href="{% static 'budget/css/auth.css' %}">
 </head>
 <body>
+    <div class="login-container">
+    
     <h2>Přihlášení do Finance Managera</h2>
-    <form method="post">
+    
+    <form method="POST">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Přihlásit se</button>
     </form>
-    <p>Nemáte účet? <a href="{% url 'register' %}">Registrujte se zde</a></p>
+    
+    <p class="auth-footer">
+    Nemáte účet? <a href="{% url 'register' %}">Registrujte se zde</a>
+    </p>
+</div>
 </body>
 </html>

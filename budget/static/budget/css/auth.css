@@ -1,0 +1,129 @@
+/* ==========================================================================
+   FIXED AUTHENTICATION PAGE LAYOUT
+   ========================================================================== */
+
+/* 1. Base setup to center the card on screen */
+body {
+    background-color: #fcfcfd;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* 2. Structured Card Container */
+.login-container {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 400px; 
+    box-shadow: 0 4px 12px rgba(10, 25, 47, 0.05);
+    box-sizing: border-box;
+    display: flex;         
+    flex-direction: column; 
+}
+
+/* 3. Title Heading (Navy Blue) */
+.login-container h2, 
+.login-box h2 {
+    color: #0a192f !important; /* Deep Navy Blue */
+    font-weight: 500;          
+    font-size: 1.6rem;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    text-align: center;
+    letter-spacing: -0.01em; 
+}
+
+/* 4. Django Form Blocks Wrapper Fix */
+form {
+    width: 100%;
+}
+
+/* Forces each label/input pair onto its own individual row line */
+form p {
+    display: block !important; 
+    margin: 0 0 1.25rem 0 !important;
+    width: 100%;
+}
+
+/* 5. Block Labels (Navy Blue) */
+form label {
+    display: block; 
+    font-weight: 700;
+    color: #0a192f;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+/* 6. Form Inputs */
+form input[type="text"], 
+form input[type="password"],
+form input {
+    display: block;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    font-size: 0.95rem;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 0.5rem;
+    transition: border-color 0.2s ease;
+}
+
+/* Active Highlight Focus State (Elegant Green) */
+form input:focus {
+    outline: none;
+    border-color: #0f766e;
+}
+
+/* 7. Submit Button (Elegant Green to Dark Navy Blue on Hover) */
+form button, 
+form input[type="submit"] {
+    display: block;
+    background: #0f766e !important;
+    color: #ffffff !important;
+    border: none !important;
+    outline: none !important;
+    width: 100%;
+    padding: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
+    margin-top: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+form button:hover, 
+form input[type="submit"]:hover {
+    background: #0a192f !important;
+}
+
+/* 8. Registration Footer Link Positioning */
+form + p, 
+.auth-footer {
+    display: block;
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: #4a4a4a;
+    width: 100%;
+}
+
+a {
+    color: #0f766e;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: #0a192f;
+    text-decoration: underline;
+}
