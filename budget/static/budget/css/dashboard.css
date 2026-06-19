@@ -1,0 +1,412 @@
+/* ==========================================================================
+   1. GLOBAL STYLES & LAYOUT
+   ========================================================================== */
+
+/* Base body presets and defaults */
+body {
+    background-color: #fcfcfd;
+    color: #000000;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    margin: 0;
+    padding: 2rem;
+    line-height: 1.5;
+}
+
+/* Page content centering container */
+body > * {
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+/* ==========================================================================
+   2. TYPOGRAPHY & HEADINGS
+   ========================================================================== */
+
+/* Main welcome heading */
+h1 {
+    color: #0a192f;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+    letter-spacing: -0.02em;
+}
+
+/* Subtitle paragraph directly below h1 */
+h1 + p {
+    margin-top: 0;
+    color: #4a4a4a;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+/* Section block headers */
+h3 {
+    color: #0a192f;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+
+/* ==========================================================================
+   3. LOGOUT BUTTON
+   ========================================================================== */
+
+/* Logout button container positioning */
+body > form[action*="logout"] {
+    float: right;
+    margin-top: 1rem;
+}
+
+/* Logout button structure */
+.logout-btn {
+    background-color: transparent;
+    color: #000000;
+    border: 1px solid #000000;
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Logout button hover state */
+.logout-btn:hover {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+/* Float clearing fix for the parent layout */
+body::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+
+/* ==========================================================================
+   4. NAVIGATION TABS & PANELS
+   ========================================================================== */
+
+/* Top tab layout bar */
+.tab-navigation {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 2rem;
+    padding-bottom: 1px;
+}
+
+/* Individual nav item button tabs */
+.nav-tab {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #7f8c8d;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s ease;
+}
+
+/* Nav tab button hover effect */
+.nav-tab:hover {
+    color: #0a192f;
+}
+
+/* Currently active view tab highlight state */
+.nav-tab.active-tab {
+    color: #0a192f;
+}
+
+/* Indicator underline accent for the active tab */
+.nav-tab.active-tab::after {
+    content: "";
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #0a192f;
+}
+
+/* Hidden view panel by default */
+.view-panel {
+    display: none;
+}
+
+/* Active visible view panel toggle */
+.view-panel.panel-visible {
+    display: block;
+}
+
+
+/* ==========================================================================
+   5. FINANCIAL METRICS & SUMMARY CARDS
+   ========================================================================== */
+
+/* Top summary row responsive grid layout */
+.summary-box {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+/* Standalone content wrapper container blocks */
+.card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+/* Card titles text elements */
+.card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #4a4a4a;
+}
+
+/* Main calculated text value labels inside cards */
+.card h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* Main balance financial status badge color */
+.balance { color: #0a192f; }
+
+/* Dynamic positive income financial state badge color */
+.income { color: #0f766e; }
+
+/* Dynamic negative expense financial state badge color */
+.expense { color: #dc2626; }
+
+
+/* ==========================================================================
+   6. RECENT ACHIEVEMENTS (DASHBOARD TAB)
+   ========================================================================== */
+
+/* Dashboard top achievements container header panel */
+.recent-achievements-banner {
+    background: #fdfdfd;
+    border: 1px solid #e5e7eb;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Mini achievements module section label titles */
+.recent-achievements-banner h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #7f8c8d;
+}
+
+/* Flexbox horizontal layout container matrix for fast metrics */
+.mini-achievements-grid {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Compact individual dashboard achievement highlights */
+.mini-achievement-card {
+    background-color: #f0fdfa;
+    border: 1px solid #0f766e;
+    padding: 0.75rem 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Mini achievement card subtitle texts names */
+.mini-achievement-card h5 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #0a192f;
+    font-weight: 700;
+}
+
+/* Summary paragraph text copy inside recent banners modules */
+.mini-achievement-card p {
+    margin: 2px 0 0 0;
+    font-size: 0.8rem;
+    color: #555;
+}
+
+/* Max item ceiling restriction limit: drops items past index count 2 */
+.mini-achievements-grid .mini-achievement-card:nth-of-type(n+3) {
+    display: none;
+}
+
+
+/* ==========================================================================
+   7. ALL ACHIEVEMENTS (FULL PANEL VIEW)
+   ========================================================================== */
+
+/* Main showcase container layout grids */
+.achievements-grid {
+    display: grid !important; 
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+    gap: 1.5rem !important;
+    margin-bottom: 2.5rem !important;
+}
+
+/* Full standalone achievement milestones block cards */
+.achievement-card {
+    border-radius: 0px !important;
+    padding: 1.5rem !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Unearned milestone fallback inactive card layout view modes */
+.achievement-card.locked {
+    background-color: #ffffff !important;
+    border: 1px dashed #cccccc !important;
+    opacity: 0.55 !important;
+}
+
+/* Earned milestone successful active badge layout configuration */
+.achievement-card.unlocked {
+    background-color: #f0fdfa !important;
+    border: 1px solid #0f766e !important;
+    opacity: 1 !important;
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.04);
+}
+
+/* Core badge titles wrapper headings lines */
+.achievement-card h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: #0a192f;
+}
+
+
+/* ==========================================================================
+   8. TRANSACTION INTAKE FORM
+   ========================================================================== */
+
+/* Form wrapper wrapper base parameters alignment settings */
+.card #transaction-form {
+    margin-top: 1rem;
+}
+
+/* Automatic responsive label/input rows styling setup alignment */
+.card #transaction-form p {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+/* Input category fields field labels labels identifiers tags descriptors */
+.card #transaction-form label {
+    font-weight: 700;
+    color: #0a192f;
+    font-size: 0.9rem;
+}
+
+/* Standard select drops fields dropdown boxes and textual boxes */
+.card #transaction-form input,
+.card #transaction-form select {
+    padding: 0.6rem;
+    border: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    font-size: 0.95rem;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+}
+
+/* Focus bounding outlines highlight indicator parameters properties */
+.card #transaction-form input:focus,
+.card #transaction-form select:focus {
+    outline: none;
+    border-color: #0a192f;
+}
+
+/* Main primary save form transaction call-to-action button properties */
+.card #transaction-form button[type="submit"] {
+    background: #06122b !important;
+    color: #ffffff !important;
+    border-radius: 0px !important;
+    padding: 0.75rem 2rem !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    border: none !important;
+    outline: none !important;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+/* Hover state parameter configurations values */
+.card #transaction-form button[type="submit"]:hover {
+    background: #0f2b67 !important;
+}
+
+
+/* ==========================================================================
+   9. TRANSACTION HISTORY LOG TABLE
+   ========================================================================== */
+
+/* History tables elements foundation parameters structural wrappers */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+}
+
+/* Column titles table headers elements rows lines controls */
+th {
+    background-color: #0a192f;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: left;
+    padding: 1rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+/* Table dataset cells fields item content containers row cells tags */
+td {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 0.95rem;
+}
+
+/* Data row background transition hover overlays triggers rules controls */
+tr:hover td {
+    background-color: #fcfcfd;
+}
+
+/* Highlighting font color values inside matrix grids row lines logs (Income) */
+td span.income {
+    font-weight: 700;
+    color: #0f766e;
+}
+
+/* Highlighting font color values inside matrix grids row lines logs (Expense) */
+td span.expense {
+    font-weight: 700;
+    color: #dc2626;
+}
+
+/* Automatically hide any unlocked achievement card beyond the first 2 */
+.mini-achievements-grid .mini-achievement-card:nth-of-type(n+3) {
+    display: none;
+}
