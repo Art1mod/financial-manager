@@ -15,22 +15,24 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
-from django.views.generic import TemplateView
-from budget.views import register, dashboard, add_transaction_ajax
+from django.urls import path
+from django.contrib.auth import views as auth_views
+from django.views.generic import RedirectView
+from budget.views import register, dashboard, add_transaction_ajax, change_currency_ajax
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
-    # Built-in Django login/logout routes (looks inside templates/registration/)
-    path('accounts/', include('django.contrib.auth.urls')),
+    #  Route the landing root path directly to dashboard layout page
+    path('', RedirectView.as_view(url='dashboard/', permanent=False)),
     
-    # Custom registration route
-    path('accounts/register/', register, name='register'),
+    #  Authentication Routing Points
+    path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    path('register/', register, name='register'),
     
-    # A landing page for the dashboard
-    path('', dashboard, name='dashboard'),
-
-    # An AJAX target endpoint:
-    path('api/transaction/add/', add_transaction_ajax, name='add_transaction_ajax'),
+    #  Application Workspace Infrastructure
+    path('dashboard/', dashboard, name='dashboard'),
+    path('add-transaction-ajax/', add_transaction_ajax, name='add_transaction_ajax'),
+    path('change-currency-ajax/', change_currency_ajax, name='change_currency_ajax'),
 ]

@@ -39,18 +39,33 @@
             </div>
         </div>
 
+        <div class="form-group">
+            <label for="id_currency">Zobrazit přehled v měně:</label>
+            <select name="currency" id="id_currency" class="form-control">
+                <option value="CZK" {% if selected_currency == 'CZK' %}selected{% endif %}>Kč (CZK)</option>
+                <option value="USD" {% if selected_currency == 'USD' %}selected{% endif %}>$ (USD)</option>
+                <option value="EUR" {% if selected_currency == 'EUR' %}selected{% endif %}>€ (EUR)</option>
+            </select>
+        </div>
+
         <div class="summary-box">
             <div class="card">
                 <h3>Aktuální bilance</h3>
-                <h2 class="balance" id="balance-display">{{ current_balance }} Kč</h2>
+                <h2 class="balance" id="balance-display">
+                    {{ current_balance }} {% if selected_currency == 'CZK' %}Kč{% elif selected_currency == 'USD' %}${% elif selected_currency == 'EUR' %}€{% endif %}
+                </h2>
             </div>
             <div class="card">
                 <h3>Celkové příjmy</h3>
-                <h2 class="income" id="income-display">+ {{ total_income }} Kč</h2>
+                <h2 class="income" id="income-display">
+                    + {{ total_income }} {% if selected_currency == 'CZK' %}Kč{% elif selected_currency == 'USD' %}${% elif selected_currency == 'EUR' %}€{% endif %}
+                </h2>
             </div>
             <div class="card">
                 <h3>Celkové výdaje</h3>
-                <h2 class="expense" id="expense-display">- {{ total_expense }} Kč</h2>
+                <h2 class="expense" id="expense-display">
+                    - {{ total_expense }} {% if selected_currency == 'CZK' %}Kč{% elif selected_currency == 'USD' %}${% elif selected_currency == 'EUR' %}€{% endif %}
+                </h2>
             </div>
         </div>
 
@@ -85,7 +100,13 @@
                             <span class="expense">Výdaj</span>
                         {% endif %}
                     </td>
-                    <td><strong>{{ tx.amount }} Kč</strong></td>
+                    <td> 
+                        {{ tx.amount }} 
+                        {% if tx.currency == 'CZK' %}Kč
+                        {% elif tx.currency == 'USD' %}$
+                        {% elif tx.currency == 'EUR' %}€
+                        {% endif %}
+                    </td>
                     <td>{{ tx.get_category_display }}</td>
                     <td>{{ tx.description }}</td>
                 </tr>
@@ -121,7 +142,6 @@
     </div>
 
 <script>
-// Tab view toggle layout engine
 function switchView(panelId, tabButton) {
     document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('panel-visible'));
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active-tab'));
@@ -130,13 +150,42 @@ function switchView(panelId, tabButton) {
     tabButton.classList.add('active-tab');
 }
 
-// Ajax Transaction Submission Pipeline
+const currencySymbols = {
+    'CZK': 'Kč',
+    'USD': '$',
+    'EUR': '€'
+};
+
+// Dropdown filter view controller logic
+document.getElementById('id_currency').addEventListener('change', function() {
+    const selectedCurrency = this.value;
+    const symbol = currencySymbols[selectedCurrency] || '';
+
+    fetch("{% url 'change_currency_ajax' %}?currency=" + selectedCurrency)
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            document.getElementById('balance-display').innerText = data.metrics.current_balance + ' ' + symbol;
+            document.getElementById('income-display').innerText = '+ ' + data.metrics.total_income + ' ' + symbol;
+            document.getElementById('expense-display').innerText = '- ' + data.metrics.total_expense + ' ' + symbol;
+            
+            const url = new URL(window.location);
+            url.searchParams.set('currency', selectedCurrency);
+            window.history.pushState({}, '', url);
+        }
+    });
+});
+
+// Ajax submit pipeline processing logic
 document.getElementById('transaction-form').addEventListener('submit', function(e) {
     e.preventDefault();
 
     const form = this;
     const formData = new FormData(form);
     const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    const activeDashboardCurrency = document.getElementById('id_currency').value;
+    formData.append('dashboard_currency', activeDashboardCurrency);
 
     fetch("{% url 'add_transaction_ajax' %}", {
         method: "POST",
@@ -148,45 +197,40 @@ document.getElementById('transaction-form').addEventListener('submit', function(
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            // 1. UPDATE DATA VALUES
-            document.getElementById('balance-display').innerText = data.metrics.current_balance + ' Kč';
-            document.getElementById('income-display').innerText = '+ ' + data.metrics.total_income + ' Kč';
-            document.getElementById('expense-display').innerText = '- ' + data.metrics.total_expense + ' Kč';
+            const dashboardSymbol = currencySymbols[activeDashboardCurrency] || '';
+            
+            document.getElementById('balance-display').innerText = data.metrics.current_balance + ' ' + dashboardSymbol;
+            document.getElementById('income-display').innerText = '+ ' + data.metrics.total_income + ' ' + dashboardSymbol;
+            document.getElementById('expense-display').innerText = '- ' + data.metrics.total_expense + ' ' + dashboardSymbol;
 
-            // 2. INJECT NEW DATA ROW IN TABLE MATRIX
             const tbody = document.getElementById('transaction-table-body');
             if (tbody.rows.length === 1 && tbody.rows[0].cells.length === 1) {
                 tbody.innerHTML = '';
             }
 
+            const txSymbol = currencySymbols[data.transaction.currency] || '';
             const typeLabel = data.transaction.type === 'INCOME' ? '<span class="income">Příjem</span>' : '<span class="expense">Výdaj</span>';
             const newRow = `
                 <tr>
                     <td>${data.transaction.date}</td>
                     <td>${typeLabel}</td>
-                    <td><strong>${data.transaction.amount} Kč</strong></td>
+                    <td>${data.transaction.amount} ${txSymbol}</td>
                     <td>${data.transaction.category}</td>
                     <td>${data.transaction.description}</td>
                 </tr>
             `;
             tbody.insertAdjacentHTML('afterbegin', newRow);
 
-            // 3. RE-RENDER ALL ACHIEVEMENTS GRID DICTIONARIES
             const achGrid = document.querySelector('.achievements-grid');
             if (achGrid) {
                 let achHtml = '';
                 data.achievements.forEach(ach => {
-                    const borderColor = ach.unlocked ? '#28a745' : '#ccc';
-                    const bgColor = ach.unlocked ? '#e8f5e9' : '#f8f9fa';
-                    const opacity = ach.unlocked ? '1' : '0.6';
-                    const lockIcon = ach.unlocked ? '🔓' : '🔒';
-
                     achHtml += `
                         <div class="achievement-card ${ach.unlocked ? 'unlocked' : 'locked'}" 
-                             style="border: 1px solid ${borderColor}; 
-                                    background-color: ${bgColor}; 
-                                    padding: 15px; border-radius: 5px; flex: 1; opacity: ${opacity};">
-                            <h4>${lockIcon} ${ach.title}</h4>
+                             style="border: 1px solid ${ach.unlocked ? '#28a745' : '#ccc'}; 
+                                    background-color: ${ach.unlocked ? '#e8f5e9' : '#f8f9fa'}; 
+                                    padding: 15px; border-radius: 5px; flex: 1; opacity: ${ach.unlocked ? '1' : '0.6'};">
+                            <h4>${ach.unlocked ? '🔓' : '🔒'} ${ach.title}</h4>
                             <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #555;">${ach.desc || ''}</p>
                         </div>
                     `;
@@ -194,12 +238,10 @@ document.getElementById('transaction-form').addEventListener('submit', function(
                 achGrid.innerHTML = achHtml;
             }
 
-            // 4. SYNC AND UPDATE RECENT MINI BANNER NODE OBJECTS
             const miniTarget = document.getElementById('mini-achievements-target');
             if (miniTarget && data.achievements) {
                 let miniHtml = '';
                 let displayedCount = 0;
-                
                 data.achievements.forEach(ach => {
                     if (ach.unlocked && displayedCount < 2) {
                         miniHtml += `
@@ -211,7 +253,6 @@ document.getElementById('transaction-form').addEventListener('submit', function(
                         displayedCount++;
                     }
                 });
-                
                 if(miniHtml === '') {
                     miniHtml = '<p style="margin: 0; font-size: 0.9em; color: #7f8c8d;">Zatím jste neodemkli žádné výkonnostní milníky.</p>';
                 }
