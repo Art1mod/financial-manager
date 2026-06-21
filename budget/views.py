@@ -1,3 +1,5 @@
+# budget/views.py
+
 # Standard Library Imports
 import urllib.request
 import json
@@ -140,7 +142,7 @@ def dashboard(request):
         'form': form,
         'achievements': achievements_context,
     }
-    return render(request, 'dashboard.html', context)
+    return render(request, 'budget/dashboard.html', context)
 
 
 @login_required

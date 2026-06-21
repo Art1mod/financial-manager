@@ -1,3 +1,5 @@
+# budget/models.py
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -31,5 +33,14 @@ class Transaction(models.Model):
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='CZK')
 
     def __str__(self):
-        return f"{self.user.username} - {self.transaction_type}: {self.amount} Kč ({self.category})"
+        currency_symbols = {
+            'CZK': 'Kč',
+            'USD': '$',
+            'EUR': '€'
+        }
+        symbol = currency_symbols.get(self.currency, self.currency)
+        type_label = self.get_transaction_type_display()
+        category_label = self.get_category_display()
+        
+        return f"{self.user.username} - {type_label}: {self.amount} {symbol} ({category_label})"
     
