@@ -1,4 +1,5 @@
 {% load static %}
+{% load gamification_tags %}
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -22,21 +23,8 @@
     </div>
 
     <div id="dashboard-view" class="view-panel panel-visible">
-        
         <div class="recent-achievements-banner" id="recent-achievements-container">
-            <h4>🎯 Poslední odemčené úspěchy</h4>
-            <div class="mini-achievements-grid" id="mini-achievements-target">
-                {% for ach in achievements %}
-                    {% if ach.unlocked %}
-                        <div class="mini-achievement-card">
-                            <h5>🔓 {{ ach.title }}</h5>
-                            <p>{{ ach.desc }}</p>
-                        </div>
-                    {% endif %}
-                {% empty %}
-                    <p style="margin: 0; font-size: 0.9em; color: #7f8c8d;">Zatím jste neodemkli žádné výkonnostní milníky.</p>
-                {% endfor %}
-            </div>
+            {% render_recent_achievements user %}
         </div>
 
         <div class="form-group">
@@ -120,155 +108,17 @@
     </div>
 
     <div id="achievements-view" class="view-panel">
-        <div class="achievements-container">
-            <h3>🏆 Všechny Úspěchy (Milestones)</h3>
-            <div class="achievements-grid" style="display: flex; gap: 20px; margin-bottom: 20px;">
-                {% for ach in achievements %}
-                    <div class="achievement-card {% if ach.unlocked %}unlocked{% else %}locked{% endif %}" 
-                         style="border: 1px solid {% if ach.unlocked %}#28a745{% else %}#ccc{% endif %}; 
-                                background-color: {% if ach.unlocked %}#e8f5e9{% else %}#f8f9fa{% endif %}; 
-                                padding: 15px; border-radius: 5px; flex: 1; opacity: {% if ach.unlocked %}1{% else %}0.6{% endif %};">
-                        <h4>
-                            {% if ach.unlocked %}🔓{% else %}🔒{% endif %} 
-                            {{ ach.title }}
-                        </h4>
-                        <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #555;">{{ ach.desc }}</p>
-                    </div>
-                {% empty %}
-                    <p>Žádné milníky nebyly v administraci nalezeny.</p>
-                {% endfor %}
-            </div>
-        </div>
+    {% render_user_achievements user %}
     </div>
 
-<script>
-function switchView(panelId, tabButton) {
-    document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('panel-visible'));
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active-tab'));
-    
-    document.getElementById(panelId).classList.add('panel-visible');
-    tabButton.classList.add('active-tab');
-}
+    <script>
+        const DjangoUrls = {
+            changeCurrency: "{% url 'change_currency_ajax' %}",
+            addTransaction: "{% url 'add_transaction_ajax' %}",
+            getAchievements: "{% url 'get_achievements' %}"
+        };
+    </script>
 
-const currencySymbols = {
-    'CZK': 'Kč',
-    'USD': '$',
-    'EUR': '€'
-};
-
-// Dropdown filter view controller logic
-document.getElementById('id_currency').addEventListener('change', function() {
-    const selectedCurrency = this.value;
-    const symbol = currencySymbols[selectedCurrency] || '';
-
-    fetch("{% url 'change_currency_ajax' %}?currency=" + selectedCurrency)
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            document.getElementById('balance-display').innerText = data.metrics.current_balance + ' ' + symbol;
-            document.getElementById('income-display').innerText = '+ ' + data.metrics.total_income + ' ' + symbol;
-            document.getElementById('expense-display').innerText = '- ' + data.metrics.total_expense + ' ' + symbol;
-            
-            const url = new URL(window.location);
-            url.searchParams.set('currency', selectedCurrency);
-            window.history.pushState({}, '', url);
-        }
-    });
-});
-
-// Ajax submit pipeline processing logic
-document.getElementById('transaction-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const form = this;
-    const formData = new FormData(form);
-    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    
-    const activeDashboardCurrency = document.getElementById('id_currency').value;
-    formData.append('dashboard_currency', activeDashboardCurrency);
-
-    fetch("{% url 'add_transaction_ajax' %}", {
-        method: "POST",
-        body: formData,
-        headers: {
-            "X-CSRFToken": csrftoken
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            const dashboardSymbol = currencySymbols[activeDashboardCurrency] || '';
-            
-            document.getElementById('balance-display').innerText = data.metrics.current_balance + ' ' + dashboardSymbol;
-            document.getElementById('income-display').innerText = '+ ' + data.metrics.total_income + ' ' + dashboardSymbol;
-            document.getElementById('expense-display').innerText = '- ' + data.metrics.total_expense + ' ' + dashboardSymbol;
-
-            const tbody = document.getElementById('transaction-table-body');
-            if (tbody.rows.length === 1 && tbody.rows[0].cells.length === 1) {
-                tbody.innerHTML = '';
-            }
-
-            const txSymbol = currencySymbols[data.transaction.currency] || '';
-            const typeLabel = data.transaction.type === 'INCOME' ? '<span class="income">Příjem</span>' : '<span class="expense">Výdaj</span>';
-            const newRow = `
-                <tr>
-                    <td>${data.transaction.date}</td>
-                    <td>${typeLabel}</td>
-                    <td>${data.transaction.amount} ${txSymbol}</td>
-                    <td>${data.transaction.category}</td>
-                    <td>${data.transaction.description}</td>
-                </tr>
-            `;
-            tbody.insertAdjacentHTML('afterbegin', newRow);
-
-            const achGrid = document.querySelector('.achievements-grid');
-            if (achGrid) {
-                let achHtml = '';
-                data.achievements.forEach(ach => {
-                    achHtml += `
-                        <div class="achievement-card ${ach.unlocked ? 'unlocked' : 'locked'}" 
-                             style="border: 1px solid ${ach.unlocked ? '#28a745' : '#ccc'}; 
-                                    background-color: ${ach.unlocked ? '#e8f5e9' : '#f8f9fa'}; 
-                                    padding: 15px; border-radius: 5px; flex: 1; opacity: ${ach.unlocked ? '1' : '0.6'};">
-                            <h4>${ach.unlocked ? '🔓' : '🔒'} ${ach.title}</h4>
-                            <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #555;">${ach.desc || ''}</p>
-                        </div>
-                    `;
-                });
-                achGrid.innerHTML = achHtml;
-            }
-
-            const miniTarget = document.getElementById('mini-achievements-target');
-            if (miniTarget && data.achievements) {
-                let miniHtml = '';
-                let displayedCount = 0;
-                data.achievements.forEach(ach => {
-                    if (ach.unlocked && displayedCount < 2) {
-                        miniHtml += `
-                            <div class="mini-achievement-card">
-                                <h5>🔓 ${ach.title}</h5>
-                                <p>${ach.desc || ''}</p>
-                            </div>
-                        `;
-                        displayedCount++;
-                    }
-                });
-                if(miniHtml === '') {
-                    miniHtml = '<p style="margin: 0; font-size: 0.9em; color: #7f8c8d;">Zatím jste neodemkli žádné výkonnostní milníky.</p>';
-                }
-                miniTarget.innerHTML = miniHtml;
-            }
-
-            form.reset();
-        } else {
-            alert('Chyba při ukládání transakce: ' + JSON.stringify(data.errors));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Něco se pokazilo na serverové vrstvě.');
-    });
-});
-</script>
+    <script src="{% static 'budget/js/dashboard.js' %}"></script>
 </body>
 </html>

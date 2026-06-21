@@ -33,23 +33,3 @@ class Transaction(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.transaction_type}: {self.amount} Kč ({self.category})"
     
-class Achievement(models.Model):
-    # This acts as a master list of available awards
-    title = models.CharField(max_length=100)
-    description = models.TextField()
-    badge_code = models.CharField(max_length=50, unique=True) # e.g., 'first_1000', '10_trans'
-
-    def __str__(self):
-        return self.title
-
-class UserAchievement(models.Model):
-    # Tracks which user has unlocked which achievement and when
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='unlocked_achievements')
-    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
-    date_unlocked = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('user', 'achievement') # Prevents unlocking the same achievement twice
-
-    def __str__(self):
-        return f"{self.user.username} unlocked {self.achievement.title}"

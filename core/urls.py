@@ -19,12 +19,14 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from budget.views import register, dashboard, add_transaction_ajax, change_currency_ajax
+from achievements.views import get_achievements_ajax
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
     #  Route the landing root path directly to dashboard layout page
     path('', RedirectView.as_view(url='dashboard/', permanent=False)),
+    path('get-achievements/', get_achievements_ajax, name='get_achievements'),
     
     #  Authentication Routing Points
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),

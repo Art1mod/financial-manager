@@ -1,0 +1,13 @@
+<div class="recent-achievements-banner" id="recent-achievements-container">
+    <h4>🎯 Poslední odemčené úspěchy</h4>
+    <div class="mini-achievements-grid" id="mini-achievements-target">
+        {% for ua in recent_achievements %}
+            <div class="mini-achievement-card">
+                <h5>🔓 {{ ua.achievement.title }}</h5>
+                <p>{{ ua.achievement.description }}</p>
+            </div>
+        {% empty %}
+            <p style="margin: 0; font-size: 0.9em; color: #7f8c8d;">Zatím jste neodemkli žádné výkonnostní milníky.</p>
+        {% endfor %}
+    </div>
+</div>

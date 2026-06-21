@@ -1,14 +1,21 @@
+# Standard Library Imports
 import urllib.request
 import json
+from decimal import Decimal
+
+# Django Imports
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import Transaction, Achievement, UserAchievement
-from .forms import TransactionForm
-from decimal import Decimal
 from django.utils.timezone import localtime
+from django.core.cache import cache
+
+# Local App Imports
+from .models import Transaction
+from .forms import TransactionForm
+from achievements.models import Achievement, UserAchievement
 
 def register(request):
     """Handles new user registrations."""
@@ -22,27 +29,43 @@ def register(request):
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
 
+
 def get_live_rates():
     """
-    Fetches real-time exchange rates directly from the Czech National Bank (ČNB).
-    Returns a safe fallback dictionary if the API is unreachable.
+    Fetches real-time exchange rates from ČNB and caches them in RAM 
+    for 24 hours to prevent API spamming and speed up page loads.
     """
+    # 1. Check if we already downloaded the rates recently
+    cached_rates = cache.get('cnb_live_rates')
+    if cached_rates:
+        return cached_rates # Return instantly from RAM!
+
     # Safe default fallback rates if network drops
     rates = {'CZK': 1.0, 'USD': 23.5, 'EUR': 25.2}
+    
     try:
-        url = "https://api.cnb.cz/cnbapi/exrates/daily/current"
+        url = "https://api.cnb.cz/cnbapi/exrates/daily"
         req = urllib.request.Request(url, headers={'Accept': 'application/json'})
+        
         with urllib.request.urlopen(req, timeout=3) as response:
             data = json.loads(response.read().decode())
             for item in data.get('rates', []):
                 code = item.get('currencyCode')
                 rate = item.get('rate')
                 amount = item.get('amount', 1)
+                
                 if code in ['USD', 'EUR']:
                     rates[code] = float(rate) / float(amount)
+                    
+        # 2. Save the successful result to the Cache for 24 hours
+        cache.set('cnb_live_rates', rates, 86400)
+        print("✅ Successfully fetched and cached new ČNB rates!")
+        
     except Exception as e:
         print(f"⚠️ ČNB API Fallback triggered: {e}")
+        
     return rates
+
 
 def calculate_user_metrics(user, target_currency):
     """Converts user transactions dynamically using live ČNB exchange values."""
@@ -76,6 +99,7 @@ def calculate_user_metrics(user, target_currency):
         'current_balance': round(total_income - total_expense, 2),
     }
 
+
 @login_required
 def dashboard(request):
     selected_currency = request.GET.get('currency', 'CZK')
@@ -87,7 +111,6 @@ def dashboard(request):
 
     # --- ACHIEVEMENT SUBSYSTEM ---
     all_achievements = Achievement.objects.all()
-    check_and_assign_achievements(request.user)
     unlocked_badges = UserAchievement.objects.filter(user=request.user).values_list('achievement__badge_code', flat=True)
     
     achievements_context = []
@@ -119,6 +142,7 @@ def dashboard(request):
     }
     return render(request, 'dashboard.html', context)
 
+
 @login_required
 def change_currency_ajax(request):
     target_currency = request.GET.get('currency', 'CZK')
@@ -135,6 +159,7 @@ def change_currency_ajax(request):
         }
     })
 
+
 @login_required
 def add_transaction_ajax(request):
     if request.method == 'POST':
@@ -143,8 +168,6 @@ def add_transaction_ajax(request):
             transaction = form.save(commit=False)
             transaction.user = request.user
             transaction.save()
-            
-            check_and_assign_achievements(request.user)
             
             dashboard_currency = request.POST.get('dashboard_currency', 'CZK')
             metrics = calculate_user_metrics(request.user, dashboard_currency)
@@ -181,31 +204,3 @@ def add_transaction_ajax(request):
             return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
             
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
-
-def check_and_assign_achievements(user):
-    """Dynamically checks conditions and unlocks user achievements."""
-    czk_metrics = calculate_user_metrics(user, 'CZK')
-    czk_balance = czk_metrics['current_balance']
-    user_txs = Transaction.objects.filter(user=user)
-    
-    # 🏆 Milestone 1: První krok (Balance over 1000 Kč)
-    if czk_balance > 1000:
-        achievement = Achievement.objects.filter(badge_code='first_1000').first() # 'first_1000' must match  the badge_code in Django Admin
-        if achievement:
-            UserAchievement.objects.get_or_create(user=user, achievement=achievement)
-
-    # 🏆 Milestone 2: Ranní ptáče (Transaction created before 9:00 AM local time)
-    for tx in user_txs:
-        if tx.date:
-            local_time = localtime(tx.date)
-            if local_time.hour < 24:
-                achievement = Achievement.objects.filter(badge_code='first_of_day').first() # 'first_of_day' must match  the badge_code in Django Admin
-                if achievement:
-                    UserAchievement.objects.get_or_create(user=user, achievement=achievement)
-                break
-            
-    # 🏆 Milestone 3: Finanční veterán (At least 10 transactions)
-    if user_txs.count() >= 10:
-        achievement = Achievement.objects.filter(badge_code='10_trans').first() # '10_trans' must match  the badge_code in Django Admin
-        if achievement:
-            UserAchievement.objects.get_or_create(user=user, achievement=achievement)

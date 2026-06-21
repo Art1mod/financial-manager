@@ -1,6 +1,5 @@
+# budget/admin.py
 from django.contrib import admin
-from .models import Transaction, Achievement, UserAchievement
+from .models import Transaction
 
 admin.site.register(Transaction)
-admin.site.register(Achievement)
-admin.site.register(UserAchievement)# Register your models here.
