@@ -73,6 +73,43 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+document.addEventListener('DOMContentLoaded', function() {
+    const typeField = document.querySelector('select[name="transaction_type"]');
+    const categoryField = document.querySelector('select[name="category"]');
+
+    function updateCategories() {
+        const selectedType = typeField.value; 
+        
+        // Save the current selection if we're just refreshing
+        const currentCategory = categoryField.value;
+        
+        // Clear current options
+        categoryField.innerHTML = '<option value="">---------</option>';
+        
+        // Populate new options
+        if (selectedType) {
+            const options = (selectedType === 'INCOME') ? incomeCats : expenseCats;
+            
+            options.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat[0]; 
+                opt.textContent = cat[1];
+                // Re-select if it matches the previous value
+                if (cat[0] === currentCategory) opt.selected = true;
+                categoryField.appendChild(opt);
+            });
+        }
+    }
+
+    if (typeField && categoryField) {
+        // Run on load to set initial state
+        updateCategories();
+        
+        // Run on change
+        typeField.addEventListener('change', updateCategories);
+    }
+});
+
 // ==========================================
 // 3. EVENT LISTENERS (The "Input" Handlers)
 // ==========================================

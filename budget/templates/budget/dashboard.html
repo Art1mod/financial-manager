@@ -1,5 +1,7 @@
 {% load static %}
 {% load gamification_tags %}
+{{ INCOME_CATEGORIES|json_script:"income-cats" }}
+{{ EXPENSE_CATEGORIES|json_script:"expense-cats" }}
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -109,7 +111,10 @@
             getAchievements: "{% url 'get_achievements' %}"
         };
     </script>
-
+    <script>
+        const incomeCats = JSON.parse(document.getElementById('income-cats').textContent);
+        const expenseCats = JSON.parse(document.getElementById('expense-cats').textContent);
+    </script>
     <script src="{% static 'budget/js/dashboard.js' %}?v=3"></script>
 </body>
 </html>

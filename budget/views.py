@@ -55,6 +55,8 @@ def dashboard(request):
         'current_balance': metrics['current_balance'],
         'selected_currency': selected_currency,
         'form': form,
+        'INCOME_CATEGORIES': Transaction.INCOME_CATEGORIES,
+        'EXPENSE_CATEGORIES': Transaction.EXPENSE_CATEGORIES,
     }
     return render(request, 'budget/dashboard.html', context)
 

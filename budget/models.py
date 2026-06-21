@@ -4,18 +4,22 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Transaction(models.Model):
-    TRANSACTION_TYPES = [
-        ('INCOME', 'Příjem'),
-        ('EXPENSE', 'Výdaj'),
+    
+    #Transaction Types
+    INCOME_CATEGORIES = [
+        ('SALARY', 'Plat'),
+        ('DIVIDEND', 'Dividendy'),
+        ('BONUS', 'Bonus'),
+        ('OTHER_INC', 'Ostatní Příjem'),
+    ]
+    EXPENSE_CATEGORIES = [
+        ('FOOD', 'Jídlo'),
+        ('RENT', 'Bydlení'),
+        ('TRANSPORT', 'Doprava'),
+        ('FUN', 'Zábava'),
+        ('OTHER_EXP', 'Ostatní Výdaj'),
     ]
     
-    CATEGORIES = [
-        ('FOOD', 'Jídlo'),
-        ('RENT', 'Bydlení/Nájem'),
-        ('TRANSPORT', 'Doprava'),
-        ('ENTERTAINMENT', 'Zábava'),
-        ('OTHER', 'Ostatní'),
-    ]
 
     CURRENCY_CHOICES = [
         ('CZK', 'Kč (CZK)'),
@@ -23,11 +27,13 @@ class Transaction(models.Model):
         ('EUR', '€ (EUR)'),
     ]
 
+    CATEGORY_CHOICES = INCOME_CATEGORIES + EXPENSE_CATEGORIES
+
     # Links transaction to a specific user. If user is deleted, their transactions are deleted.
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transactions')
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    transaction_type = models.CharField(max_length=7, choices=TRANSACTION_TYPES)
-    category = models.CharField(max_length=15, choices=CATEGORIES, default='OTHER')
+    transaction_type = models.CharField(max_length=10, choices=[('INCOME', 'Příjem'), ('EXPENSE', 'Výdaj')])
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     description = models.CharField(max_length=255, blank=True)
     date = models.DateTimeField(auto_now_add=True)
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='CZK')
