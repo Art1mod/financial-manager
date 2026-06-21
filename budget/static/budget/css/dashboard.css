@@ -290,72 +290,79 @@ body::after {
     color: #0a192f;
 }
 
-
 /* ==========================================================================
    8. TRANSACTION INTAKE FORM
    ========================================================================== */
 
-/* Form wrapper wrapper base parameters alignment settings */
-.card #transaction-form {
+#transaction-form {
     margin-top: 1rem;
 }
 
-/* Automatic responsive label/input rows styling setup alignment */
-.card #transaction-form p {
+/* Grid layout for all form rows (Labels on left, inputs on right) */
+#transaction-form p, .form-row {
     display: grid;
-    grid-template-columns: 150px 1fr;
-    align-items: center;
-    margin-bottom: 1rem;
+    grid-template-columns: 200px 1fr;
+    align-items: start;
+    margin-bottom: 1.25rem;
 }
 
-/* Input category fields field labels labels identifiers tags descriptors */
-.card #transaction-form label {
+/* Styling for all form labels */
+#transaction-form label, .form-group label {
     font-weight: 700;
     color: #0a192f;
     font-size: 0.9rem;
+    padding-top: 0.8rem;
 }
 
-/* Standard select drops fields dropdown boxes and textual boxes */
-.card #transaction-form input,
-.card #transaction-form select {
-    padding: 0.6rem;
+/* Universal input/select/textarea styling */
+.form-control, #transaction-form input, #transaction-form select, #transaction-form textarea { 
+    padding: 0.8rem;
     border: 1px solid #e5e7eb;
     background-color: #ffffff;
     font-size: 0.95rem;
     width: 100%;
     max-width: 400px;
     box-sizing: border-box;
+    display: block;
+    transition: border-color 0.2s ease;
 }
 
-/* Focus bounding outlines highlight indicator parameters properties */
-.card #transaction-form input:focus,
-.card #transaction-form select:focus {
+/* Input focus states */
+.form-control:focus, #transaction-form input:focus, #transaction-form select:focus, #transaction-form textarea:focus {
     outline: none;
     border-color: #0a192f;
 }
 
-/* Main primary save form transaction call-to-action button properties */
-.card #transaction-form button[type="submit"] {
-    background: #06122b !important;
-    color: #ffffff !important;
-    border-radius: 0px !important;
-    padding: 0.75rem 2rem !important;
+/* Specific textarea override for more width */
+#transaction-form textarea {
+    max-width: 550px;
+    resize: vertical;
+}
+
+/* Character counter text style */
+#char-counter {
+    display: block;
+    color: #7f8c8d;
+    margin-top: 5px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Submit button appearance */
+#transaction-form button[type="submit"] {
+    background: #06122b;
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 2rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 0.85rem;
-    margin-top: 0.5rem;
-    border: none !important;
-    outline: none !important;
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
 
-/* Hover state parameter configurations values */
-.card #transaction-form button[type="submit"]:hover {
-    background: #0f2b67 !important;
+#transaction-form button[type="submit"]:hover {
+    background: #0f2b67;
 }
-
 
 /* ==========================================================================
    9. TRANSACTION HISTORY LOG TABLE
@@ -392,53 +399,32 @@ tr:hover td {
     background-color: #fcfcfd;
 }
 
-/* --- COLUMN SIZING AND BEHAVIOR --- */
-
-/* --- ADJUSTED COLUMN SIZING (Adding up to 100%) --- */
-.col-delete {width: 1%; white-space: nowrap; }
+/* Column Sizing */
+.col-delete { width: 1%; white-space: nowrap; }
 .col-date { width: 8%; white-space: nowrap; }
 .col-type { width: 8%; white-space: nowrap; }
 .col-amount { width: 10%; white-space: nowrap; }
 .col-category { width: 10%; white-space: nowrap; }
 .col-desc { width: 63%; white-space: normal; overflow-wrap: anywhere; }
 
+/* Financial badges and helpers */
+td span.income { font-weight: 700; color: #0f766e; }
+td span.expense { font-weight: 700; color: #dc2626; }
+.converted-amount { color: #7f8c8d; font-size: 0.85em; }
 
-/* Subtle styling for the converted currency math */
-.converted-amount {
-    color: #7f8c8d;
-    font-size: 0.85em;
-}
+.mini-achievements-grid .mini-achievement-card:nth-of-type(n+3) { display: none; }
 
-/* --- FINANCIAL BADGES --- */
-
-td span.income {
-    font-weight: 700;
-    color: #0f766e;
-}
-
-td span.expense {
-    font-weight: 700;
-    color: #dc2626;
-}
-
-/* Automatically hide any unlocked achievement card beyond the first 2 */
-.mini-achievements-grid .mini-achievement-card:nth-of-type(n+3) {
-    display: none;
-}
-
-/* Minimalist delete button */
 .btn-delete {
     background: none;
     border: none;
-    color: #cbd5e1; /* Light gray by default */
+    color: #cbd5e1;
     font-size: 1.25rem;
     cursor: pointer;
     transition: color 0.2s ease, transform 0.1s ease;
     padding: 0 0.5rem;
 }
 
-/* Subtle hover effect: only turn red when hovered */
 .btn-delete:hover {
-    color: #ef4444; /* Soft red on hover */
+    color: #ef4444;
     transform: scale(1.1);
 }

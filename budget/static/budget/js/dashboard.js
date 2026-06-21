@@ -56,6 +56,23 @@ function deleteTransaction(transactionId) {
     });
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    const descField = document.querySelector('textarea[name="description"]');
+    const counter = document.getElementById('char-counter');
+
+    if (descField && counter) {
+        const limit = descField.getAttribute('data-max-length') || 255;
+        
+        descField.addEventListener('input', function() {
+            const currentLength = descField.value.length;
+            counter.innerText = `${currentLength} / ${limit} znaků`;
+            
+            // Optional: red color for nearing limit
+            counter.style.color = (currentLength >= limit) ? '#dc2626' : '#7f8c8d';
+        });
+    }
+});
+
 // ==========================================
 // 3. EVENT LISTENERS (The "Input" Handlers)
 // ==========================================

@@ -27,7 +27,7 @@
             {% render_recent_achievements user %}
         </div>
 
-        <div class="form-group">
+        <div class="form-group form-row">
             <label for="id_currency">Zobrazit přehled v měně:</label>
             <select name="currency" id="id_currency" class="form-control">
                 <option value="CZK" {% if selected_currency == 'CZK' %}selected{% endif %}>Kč (CZK)</option>
@@ -57,14 +57,28 @@
             </div>
         </div>
 
-        <div class="card">
-            <h3>Přidat novou transakci</h3>
-            <form method="post" id="transaction-form">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit">Uložit transakci</button>
-            </form>
-        </div>
+        <form method="post" id="transaction-form">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                {% if field.name == 'description' %}
+                    <p class="form-row">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        <div>
+                            {{ field }}
+                            <small id="char-counter">0 / 255 znaků</small>
+                        </div>
+                    </p>
+                {% else %}
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                    </p>
+                {% endif %}
+            {% endfor %}
+            
+            <button type="submit">Uložit transakci</button>
+        </form>
 
         <h3>Historie transakcí</h3>
         <table>
