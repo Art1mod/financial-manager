@@ -148,14 +148,25 @@ body::after {
    5. FINANCIAL METRICS & SUMMARY CARDS
    ========================================================================== */
 
-/* Top summary row responsive grid layout */
+/* 1. Control the bottom margin of the currency selector card */
+.mini-card {
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem; 
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    display: inline-block;
+    min-width: 300px;
+}
+
+/* 2. Ensure the summary box doesn't have an excessive top margin */
 .summary-box {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
 }
-
 /* Standalone content wrapper container blocks */
 .card {
     background: #ffffff;
@@ -199,7 +210,7 @@ body::after {
     background: #fdfdfd;
     border: 1px solid #e5e7eb;
     padding: 1rem 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 /* Mini achievements module section label titles */
@@ -294,6 +305,22 @@ body::after {
    8. TRANSACTION INTAKE FORM
    ========================================================================== */
 
+   /* Ensure the form card expands to fit the form content */
+.form-card {
+    padding: 2rem;
+    margin-top: 2rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px; /* Matching your other cards */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Optional: If the original .card has fixed dimensions, reset them here */
+.form-card {
+    width: 100%;
+    max-width: 800px; /* Or whatever width looks best */
+}
+
 #transaction-form {
     margin-top: 1rem;
 }
@@ -325,6 +352,16 @@ body::after {
     box-sizing: border-box;
     display: block;
     transition: border-color 0.2s ease;
+}
+
+#transaction-form textarea {
+    width: 100%;
+    max-width: 550px;
+    height: 150px;       
+    min-height: 100px;   
+    max-height: 200px;   
+    resize: vertical;    
+    box-sizing: border-box;
 }
 
 /* Input focus states */
@@ -364,6 +401,7 @@ body::after {
     background: #0f2b67;
 }
 
+
 /* ==========================================================================
    9. TRANSACTION HISTORY LOG TABLE
    ========================================================================== */
@@ -389,10 +427,10 @@ th {
 }
 
 td {
-    padding: 1rem;
+    padding: 0.75rem; /* Reduced slightly to prevent overflow */
     border-bottom: 1px solid #e5e7eb;
-    font-size: 0.95rem;
-    vertical-align: top;
+    font-size: 1.0rem;
+    vertical-align: center; /* Changed to middle for better button alignment */
 }
 
 tr:hover td {
@@ -400,12 +438,21 @@ tr:hover td {
 }
 
 /* Column Sizing */
-.col-delete { width: 1%; white-space: nowrap; }
-.col-date { width: 8%; white-space: nowrap; }
-.col-type { width: 8%; white-space: nowrap; }
-.col-amount { width: 10%; white-space: nowrap; }
-.col-category { width: 10%; white-space: nowrap; }
-.col-desc { width: 63%; white-space: normal; overflow-wrap: anywhere; }
+.col-delete   { width: 0%; } 
+.col-edit     { width: 5%; }
+.col-date     { width: 10%; }
+.col-type     { width: 6%; }
+.col-amount   { width: 15%; }
+.col-category { width: 10%; }
+.col-desc { 
+    width: 64%; 
+    white-space: normal;       /* Allows text to wrap to new lines */
+    word-break: break-all;     /* Forces long strings to break */
+    overflow-wrap: break-word; /* Ensures words break at edges */
+    vertical-align: top;       /* Keeps text at the top of the cell */
+    padding: 1rem;             /* Ensure padding doesn't collapse */
+}
+
 
 /* Financial badges and helpers */
 td span.income { font-weight: 700; color: #0f766e; }
@@ -428,3 +475,74 @@ td span.expense { font-weight: 700; color: #dc2626; }
     color: #ef4444;
     transform: scale(1.1);
 }
+
+
+.btn-edit {
+    background: none;
+    border: none;
+    color: #cbd5e1;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.1s ease;
+    padding: 0 1rem;
+}
+
+.btn-edit:hover {
+    color: #2563eb; 
+    transform: scale(1.1);
+}
+
+
+/* Modal Overlay - Instant display */
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5); 
+    display: none;
+    z-index: 1000;
+}
+
+.modal.show {
+    display: block !important;
+}
+
+/* Ensure the modal content stays at a fixed width */
+.modal-content {
+    background: #ffffff;
+    margin: 5% auto;
+    padding: 2rem;
+    width: 450px;       
+    max-width: 90%;     
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    overflow: hidden; 
+}
+
+/* Force the textarea inside the modal to respect the box width */
+#edit-form-container textarea {
+    width: 100%;
+    min-height: 100px;
+    max-height: 200px;
+    resize: vertical;
+    box-sizing: border-box; 
+    word-break: break-word; 
+}
+
+#edit-form-container label {
+    display: block;
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.9rem;
+}
+
+#edit-form-container input, 
+#edit-form-container select, 
+#edit-form-container textarea {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+

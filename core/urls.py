@@ -18,7 +18,15 @@ from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
-from budget.views import register, dashboard, add_transaction_ajax, change_currency_ajax, delete_transaction_ajax
+from budget.views import (
+    dashboard, 
+    register, 
+    change_currency_ajax, 
+    add_transaction_ajax, 
+    delete_transaction_ajax,
+    update_transaction_ajax,        
+    get_transaction_details         
+)
 from achievements.views import get_achievements_ajax
 
 urlpatterns = [
@@ -39,4 +47,6 @@ urlpatterns = [
     path('change-currency-ajax/', change_currency_ajax, name='change_currency_ajax'),
 
     path('delete-transaction/<int:transaction_id>/', delete_transaction_ajax, name='delete_transaction_ajax'),
+    path('get-transaction/<int:transaction_id>/', get_transaction_details, name='get_transaction_details'),
+    path('update-transaction/<int:transaction_id>/', update_transaction_ajax, name='update_transaction_ajax'),
 ]

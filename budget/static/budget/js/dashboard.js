@@ -14,9 +14,9 @@ function switchView(panelId, tabButton) {
 }
 
 function updateFinancialMetricsUI(metrics, symbol) {
-    document.getElementById('balance-display').innerText = `${metrics.current_balance} ${symbol}`;
-    document.getElementById('income-display').innerText = `+ ${metrics.total_income} ${symbol}`;
-    document.getElementById('expense-display').innerText = `- ${metrics.total_expense} ${symbol}`;
+    document.getElementById('balance-display').innerText = `${metrics.current_balance.toFixed(2)} ${symbol}`;
+    document.getElementById('income-display').innerText = `+ ${metrics.total_income.toFixed(2)} ${symbol}`;
+    document.getElementById('expense-display').innerText = `- ${metrics.total_expense.toFixed(2)} ${symbol}`;
 }
 
 function refreshAchievementsUI() {
@@ -54,6 +54,65 @@ function deleteTransaction(transactionId) {
             alert('Chyba při mazání.');
         }
     });
+}
+
+function enableEdit(cell, transactionId, field) {
+    const currentValue = cell.innerText;
+    cell.innerHTML = `<input type="text" value="${currentValue}" onblur="saveEdit(this, ${transactionId}, '${field}')">`;
+    cell.querySelector('input').focus();
+}
+
+function saveEdit(input, transactionId, field) {
+    const newValue = input.value;
+    // AJAX call to the edit_transaction_ajax view
+    // After success: update metrics and reload table HTML
+}
+
+function openEditModal(transactionId) {
+    const modal = document.getElementById('edit-modal');
+    const container = document.getElementById('edit-form-container');
+
+    fetch(`/get-transaction/${transactionId}/`)
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('edit-transaction-id').value = transactionId;
+        container.innerHTML = data.form_html;
+        
+        // Ensure modal is visible
+        modal.style.display = 'block';
+        modal.classList.add('show');
+
+        // --- Smart Category logic inside modal ---
+        const typeField = container.querySelector('select[name="transaction_type"]');
+        const categoryField = container.querySelector('select[name="category"]');
+
+        function updateModalCategories() {
+            const selectedType = typeField.value;
+            const currentCategory = categoryField.value;
+            
+            categoryField.innerHTML = '<option value="">---------</option>';
+            
+            if (selectedType) {
+                const options = (selectedType === 'INCOME') ? incomeCats : expenseCats;
+                options.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat[0];
+                    opt.textContent = cat[1];
+                    if (cat[0] === currentCategory) opt.selected = true;
+                    categoryField.appendChild(opt);
+                });
+            }
+        }
+
+        updateModalCategories();
+        typeField.addEventListener('change', updateModalCategories);
+    });
+}
+
+function closeEditModal() {
+    const modal = document.getElementById('edit-modal');
+    modal.classList.remove('show');
+    modal.style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -108,6 +167,31 @@ document.addEventListener('DOMContentLoaded', function() {
         // Run on change
         typeField.addEventListener('change', updateCategories);
     }
+});
+
+document.getElementById('edit-transaction-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const transactionId = document.getElementById('edit-transaction-id').value;
+    const formData = new FormData(this);
+    const activeCurrency = document.getElementById('id_currency').value;
+    
+    formData.append('dashboard_currency', activeCurrency);
+
+    fetch(`/update-transaction/${transactionId}/`, {
+        method: "POST",
+        body: formData,
+        headers: { "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            document.getElementById('transaction-table-body').innerHTML = data.table_html;
+            updateFinancialMetricsUI(data.metrics, currencySymbols[activeCurrency]);
+            closeEditModal();
+        } else {
+            alert('Chyba: ' + JSON.stringify(data.errors));
+        }
+    });
 });
 
 // ==========================================

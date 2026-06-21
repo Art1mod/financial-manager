@@ -29,13 +29,15 @@
             {% render_recent_achievements user %}
         </div>
 
-        <div class="form-group form-row">
-            <label for="id_currency">Zobrazit přehled v měně:</label>
-            <select name="currency" id="id_currency" class="form-control">
-                <option value="CZK" {% if selected_currency == 'CZK' %}selected{% endif %}>Kč (CZK)</option>
-                <option value="USD" {% if selected_currency == 'USD' %}selected{% endif %}>$ (USD)</option>
-                <option value="EUR" {% if selected_currency == 'EUR' %}selected{% endif %}>€ (EUR)</option>
-            </select>
+        <div class="card mini-card">
+            <div class="form-group form-row" style="margin-bottom: 0;">
+                <label for="id_currency">Zobrazit přehled v měně:</label>
+                <select name="currency" id="id_currency" class="form-control">
+                    <option value="CZK" {% if selected_currency == 'CZK' %}selected{% endif %}>Kč (CZK)</option>
+                    <option value="USD" {% if selected_currency == 'USD' %}selected{% endif %}>$ (USD)</option>
+                    <option value="EUR" {% if selected_currency == 'EUR' %}selected{% endif %}>€ (EUR)</option>
+                </select>
+            </div>
         </div>
 
         <div class="summary-box">
@@ -59,34 +61,38 @@
             </div>
         </div>
 
-        <form method="post" id="transaction-form">
-            {% csrf_token %}
-            
-            {% for field in form %}
-                {% if field.name == 'description' %}
-                    <p class="form-row">
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        <div>
+        <div class="card form-card">
+            <h3>Nová transakce</h3>
+            <form method="post" id="transaction-form">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                    {% if field.name == 'description' %}
+                        <p class="form-row">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            <div>
+                                {{ field }}
+                                <small id="char-counter">0 / 255 znaků</small>
+                            </div>
+                        </p>
+                    {% else %}
+                        <p>
+                            {{ field.label_tag }}
                             {{ field }}
-                            <small id="char-counter">0 / 255 znaků</small>
-                        </div>
-                    </p>
-                {% else %}
-                    <p>
-                        {{ field.label_tag }}
-                        {{ field }}
-                    </p>
-                {% endif %}
-            {% endfor %}
-            
-            <button type="submit">Uložit transakci</button>
-        </form>
+                        </p>
+                    {% endif %}
+                {% endfor %}
+                
+                <button type="submit">Uložit transakci</button>
+            </form>
+        </div>
 
         <h3>Historie transakcí</h3>
         <table>
             <thead>
                 <tr>
                     <th class="col-delete"></th>
+                    <th class="col-edit"></th>
                     <th class="col-date">Datum</th>
                     <th class="col-type">Typ</th>
                     <th class="col-amount">Částka</th>
@@ -98,6 +104,19 @@
                 {% include 'budget/partials/transaction_table.html' %}
             </tbody>
         </table>
+
+        <div id="edit-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>Upravit transakci</h3>
+                <form id="edit-transaction-form">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit-transaction-id" name="id">
+                    <div id="edit-form-container"></div>
+                    <button type="button" onclick="closeEditModal()">Zrušit</button>
+                    <button type="submit">Uložit změny</button>
+                </form>
+            </div>
+        </div>
     </div>
 
     <div id="achievements-view" class="view-panel">

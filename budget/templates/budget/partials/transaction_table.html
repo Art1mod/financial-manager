@@ -1,9 +1,10 @@
 {% for tx in transactions %}
 <tr>
     <td class="col-delete">
-        <button onclick="deleteTransaction({{ tx.id }})" class="btn-delete" title="Smazat transakci">
-            &times;
-        </button>
+        <button onclick="deleteTransaction({{ tx.id }})" class="btn-delete" title="Smazat transakci">&times;</button>
+    </td>
+    <td class="col-edit">
+        <button type="button" class="btn-edit" onclick="openEditModal({{ tx.id }})" title="Upravit transakci">✎</button>
     </td>
     <td class="col-date">{{ tx.date|date:"d. m. Y" }}</td>
     
@@ -16,7 +17,7 @@
     </td>
     
     <td class="col-amount"> 
-        {{ tx.amount|floatformat:"-2" }} 
+        {{ tx.amount|floatformat:"2" }} 
         {% if tx.currency == 'CZK' %}Kč{% elif tx.currency == 'USD' %}${% elif tx.currency == 'EUR' %}€{% endif %}
         
         {% if tx.currency != selected_currency %}

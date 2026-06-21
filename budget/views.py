@@ -142,3 +142,52 @@ def delete_transaction_ajax(request, transaction_id):
             'current_balance': float(metrics['current_balance']),
         }
     })
+
+@require_POST
+@login_required
+def edit_transaction_ajax(request, transaction_id):
+    transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
+    field = request.POST.get('field')  # e.g., 'amount', 'category', 'description'
+    value = request.POST.get('value')
+
+    if hasattr(transaction, field):
+        setattr(transaction, field, value)
+        transaction.save()
+        # Return updated table and metrics just like your delete view
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@login_required
+def get_transaction_details(request, transaction_id):
+    transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
+    form = TransactionForm(instance=transaction)
+    form_html = render_to_string('budget/partials/edit_form.html', {'form': form})
+    return JsonResponse({'form_html': form_html})
+
+@login_required
+def update_transaction_ajax(request, transaction_id):
+    transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
+    if request.method == 'POST':
+        form = TransactionForm(request.POST, instance=transaction)
+        if form.is_valid():
+            form.save()
+            
+            # RE-CALCULATE AND RENDER (Just like in add/delete views)
+            dashboard_currency = request.POST.get('dashboard_currency', 'CZK')
+            metrics = calculate_user_metrics(request.user, dashboard_currency)
+            user_transactions = get_annotated_transactions(request.user, dashboard_currency)
+            table_html = render_to_string('budget/partials/transaction_table.html', {
+                'transactions': user_transactions,
+                'selected_currency': dashboard_currency
+            })
+            
+            return JsonResponse({
+                'status': 'success',
+                'table_html': table_html,
+                'metrics': {
+                    'total_income': float(metrics['total_income']),
+                    'total_expense': float(metrics['total_expense']),
+                    'current_balance': float(metrics['current_balance']),
+                }
+            })
+        return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
