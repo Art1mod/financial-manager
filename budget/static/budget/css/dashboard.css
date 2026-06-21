@@ -361,16 +361,15 @@ body::after {
    9. TRANSACTION HISTORY LOG TABLE
    ========================================================================== */
 
-/* History tables elements foundation parameters structural wrappers */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1rem;
     background: #ffffff;
     border: 1px solid #e5e7eb;
+    table-layout: fixed; 
 }
 
-/* Column titles table headers elements rows lines controls */
 th {
     background-color: #0a192f;
     color: #ffffff;
@@ -382,25 +381,39 @@ th {
     letter-spacing: 0.03em;
 }
 
-/* Table dataset cells fields item content containers row cells tags */
 td {
     padding: 1rem;
     border-bottom: 1px solid #e5e7eb;
     font-size: 0.95rem;
+    vertical-align: top;
 }
 
-/* Data row background transition hover overlays triggers rules controls */
 tr:hover td {
     background-color: #fcfcfd;
 }
 
-/* Highlighting font color values inside matrix grids row lines logs (Income) */
+/* --- COLUMN SIZING AND BEHAVIOR --- */
+
+/* --- ADJUSTED COLUMN SIZING (Adding up to 100%) --- */
+.col-date { width: 8%; white-space: nowrap; }
+.col-type { width: 8%; white-space: nowrap; }
+.col-amount { width: 10%; white-space: nowrap; }
+.col-category { width: 10%; white-space: nowrap; }
+.col-desc { width: 54%; word-wrap: break-word; }
+
+/* Subtle styling for the converted currency math */
+.converted-amount {
+    color: #7f8c8d;
+    font-size: 0.85em;
+}
+
+/* --- FINANCIAL BADGES --- */
+
 td span.income {
     font-weight: 700;
     color: #0f766e;
 }
 
-/* Highlighting font color values inside matrix grids row lines logs (Expense) */
 td span.expense {
     font-weight: 700;
     color: #dc2626;

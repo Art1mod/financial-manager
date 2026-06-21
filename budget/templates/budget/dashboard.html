@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Finance Manager - Dashboard</title>
-    <link rel="stylesheet" href="{% static 'budget/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'budget/css/dashboard.css' %}?v=3">
 </head>
 <body>
 
@@ -70,11 +70,11 @@
         <table>
             <thead>
                 <tr>
-                    <th>Datum</th>
-                    <th>Typ</th>
-                    <th>Částka</th>
-                    <th>Kategorie</th>
-                    <th>Popis</th>
+                    <th class="col-date">Datum</th>
+                    <th class="col-type">Typ</th>
+                    <th class="col-amount">Částka</th>
+                    <th class="col-category">Kategorie</th>
+                    <th class="col-desc">Popis</th>
                 </tr>
             </thead>
             <tbody id="transaction-table-body">
@@ -95,6 +95,6 @@
         };
     </script>
 
-    <script src="{% static 'budget/js/dashboard.js' %}?v=2"></script>
+    <script src="{% static 'budget/js/dashboard.js' %}?v=3"></script>
 </body>
 </html>

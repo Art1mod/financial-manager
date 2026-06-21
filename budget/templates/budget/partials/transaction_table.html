@@ -1,23 +1,27 @@
 {% for tx in transactions %}
 <tr>
-    <td>{{ tx.date|date:"d. m. Y" }}</td>
-    <td>
+    <td class="col-date">{{ tx.date|date:"d. m. Y" }}</td>
+    
+    <td class="col-type">
         {% if tx.transaction_type == 'INCOME' %}
             <span class="income">Příjem</span>
         {% else %}
             <span class="expense">Výdaj</span>
         {% endif %}
     </td>
-    <td> 
-        {{ tx.amount }} 
+    
+    <td class="col-amount"> 
+        {{ tx.amount|floatformat:"-2" }} 
         {% if tx.currency == 'CZK' %}Kč{% elif tx.currency == 'USD' %}${% elif tx.currency == 'EUR' %}€{% endif %}
         
         {% if tx.currency != selected_currency %}
-            <br><small style="color: #7f8c8d;">(~ {{ tx.converted_amount }} {{ selected_currency }})</small>
+            <br><small class="converted-amount">(~ {{ tx.converted_amount|floatformat:"-2" }} {{ selected_currency }})</small>
         {% endif %}
     </td>
-    <td>{{ tx.get_category_display }}</td>
-    <td>{{ tx.description }}</td>
+    
+    <td class="col-category">{{ tx.get_category_display }}</td>
+    
+    <td class="col-desc" title="{{ tx.description }}">{{ tx.description }}</td>
 </tr>
 {% empty %}
 <tr>
