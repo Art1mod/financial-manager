@@ -395,11 +395,13 @@ tr:hover td {
 /* --- COLUMN SIZING AND BEHAVIOR --- */
 
 /* --- ADJUSTED COLUMN SIZING (Adding up to 100%) --- */
+.col-delete {width: 1%; white-space: nowrap; }
 .col-date { width: 8%; white-space: nowrap; }
 .col-type { width: 8%; white-space: nowrap; }
 .col-amount { width: 10%; white-space: nowrap; }
 .col-category { width: 10%; white-space: nowrap; }
-.col-desc { width: 54%; word-wrap: break-word; }
+.col-desc { width: 63%; white-space: normal; overflow-wrap: anywhere; }
+
 
 /* Subtle styling for the converted currency math */
 .converted-amount {
@@ -422,4 +424,21 @@ td span.expense {
 /* Automatically hide any unlocked achievement card beyond the first 2 */
 .mini-achievements-grid .mini-achievement-card:nth-of-type(n+3) {
     display: none;
+}
+
+/* Minimalist delete button */
+.btn-delete {
+    background: none;
+    border: none;
+    color: #cbd5e1; /* Light gray by default */
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: color 0.2s ease, transform 0.1s ease;
+    padding: 0 0.5rem;
+}
+
+/* Subtle hover effect: only turn red when hovered */
+.btn-delete:hover {
+    color: #ef4444; /* Soft red on hover */
+    transform: scale(1.1);
 }

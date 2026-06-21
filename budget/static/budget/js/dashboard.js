@@ -33,6 +33,29 @@ function refreshAchievementsUI() {
     .catch(err => console.error("Error fetching achievements:", err));
 }
 
+function deleteTransaction(transactionId) {
+    if (!confirm('Opravdu chcete tuto transakci smazat?')) return;
+
+    const currency = document.getElementById('id_currency').value;
+    const symbol = currencySymbols[currency] || '';
+
+    fetch(`/delete-transaction/${transactionId}/?currency=${currency}`, {
+        method: "POST",
+        headers: { 
+            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value 
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            updateFinancialMetricsUI(data.metrics, symbol);
+            document.getElementById('transaction-table-body').innerHTML = data.table_html;
+        } else {
+            alert('Chyba při mazání.');
+        }
+    });
+}
+
 // ==========================================
 // 3. EVENT LISTENERS (The "Input" Handlers)
 // ==========================================

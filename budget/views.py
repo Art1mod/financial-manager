@@ -9,6 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils.timezone import localtime
 from django.template.loader import render_to_string
+from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
 
 # Local App Imports
 from .models import Transaction
@@ -112,3 +114,29 @@ def add_transaction_ajax(request):
         else:
             return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+@require_POST
+@login_required
+def delete_transaction_ajax(request, transaction_id):
+    
+    transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
+    transaction.delete()
+    
+    dashboard_currency = request.GET.get('currency', 'CZK')
+    metrics = calculate_user_metrics(request.user, dashboard_currency)
+    user_transactions = get_annotated_transactions(request.user, dashboard_currency)
+    
+    table_html = render_to_string('budget/partials/transaction_table.html', {
+        'transactions': user_transactions,
+        'selected_currency': dashboard_currency
+    })
+    
+    return JsonResponse({
+        'status': 'success',
+        'table_html': table_html,
+        'metrics': {
+            'total_income': float(metrics['total_income']),
+            'total_expense': float(metrics['total_expense']),
+            'current_balance': float(metrics['current_balance']),
+        }
+    })
