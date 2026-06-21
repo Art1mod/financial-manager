@@ -8,12 +8,12 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils.timezone import localtime
+from django.template.loader import render_to_string
 
 # Local App Imports
 from .models import Transaction
 from .forms import TransactionForm
-from achievements.models import Achievement, UserAchievement
-from .services import calculate_user_metrics
+from .services import calculate_user_metrics, get_annotated_transactions
 
 def register(request):
     """Handles new user registrations."""
@@ -33,20 +33,8 @@ def dashboard(request):
     if selected_currency not in ['CZK', 'USD', 'EUR']:
         selected_currency = 'CZK'
 
-    user_transactions = Transaction.objects.filter(user=request.user).order_by('-date')
+    user_transactions = get_annotated_transactions(request.user, selected_currency)
     metrics = calculate_user_metrics(request.user, selected_currency)
-
-    # --- ACHIEVEMENT SUBSYSTEM ---
-    all_achievements = Achievement.objects.all()
-    unlocked_badges = UserAchievement.objects.filter(user=request.user).values_list('achievement__badge_code', flat=True)
-    
-    achievements_context = []
-    for ach in all_achievements:
-        achievements_context.append({
-            'title': ach.title,
-            'desc': ach.description,
-            'unlocked': ach.badge_code in unlocked_badges
-        })
 
     if request.method == 'POST':
         form = TransactionForm(request.POST)
@@ -65,7 +53,6 @@ def dashboard(request):
         'current_balance': metrics['current_balance'],
         'selected_currency': selected_currency,
         'form': form,
-        'achievements': achievements_context,
     }
     return render(request, 'budget/dashboard.html', context)
 
@@ -77,13 +64,21 @@ def change_currency_ajax(request):
         target_currency = 'CZK'
         
     metrics = calculate_user_metrics(request.user, target_currency)
+    user_transactions = get_annotated_transactions(request.user, target_currency)
+    
+    table_html = render_to_string('budget/partials/transaction_table.html', {
+        'transactions': user_transactions,
+        'selected_currency': target_currency
+    })
+    
     return JsonResponse({
         'status': 'success',
         'metrics': {
             'total_income': float(metrics['total_income']),
             'total_expense': float(metrics['total_expense']),
             'current_balance': float(metrics['current_balance']),
-        }
+        },
+        'table_html': table_html 
     })
 
 
@@ -98,36 +93,22 @@ def add_transaction_ajax(request):
             
             dashboard_currency = request.POST.get('dashboard_currency', 'CZK')
             metrics = calculate_user_metrics(request.user, dashboard_currency)
+            user_transactions = get_annotated_transactions(request.user, dashboard_currency)
 
-            all_achievements = Achievement.objects.all()
-            unlocked_badges = UserAchievement.objects.filter(user=request.user).values_list('achievement__badge_code', flat=True)
-
-            achievements_ajax = []
-            for ach in all_achievements:
-                achievements_ajax.append({
-                    'title': ach.title,
-                    'desc': ach.description,  
-                    'unlocked': ach.badge_code in unlocked_badges
-                })
+            table_html = render_to_string('budget/partials/transaction_table.html', {
+                'transactions': user_transactions,
+                'selected_currency': dashboard_currency
+            })
 
             return JsonResponse({
                 'status': 'success',
-                'transaction': {
-                    'date': localtime(transaction.date).strftime('%d. %m. %Y') if transaction.date else '',
-                    'type': transaction.transaction_type,
-                    'amount': str(transaction.amount),
-                    'currency': transaction.currency,
-                    'category': transaction.get_category_display(),
-                    'description': transaction.description or '',
-                },
+                'table_html': table_html, 
                 'metrics': {
                     'total_income': float(metrics['total_income']),
                     'total_expense': float(metrics['total_expense']),
                     'current_balance': float(metrics['current_balance']),
-                },
-                'achievements': achievements_ajax
+                }
             })
         else:
             return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
-            
-    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)

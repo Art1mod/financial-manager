@@ -76,5 +76,17 @@ def get_live_rates():
         
     return rates
 
+def get_annotated_transactions(user, target_currency):
+    """Fetches transactions and attaches the converted amount for the table UI."""
+    
+    transactions = list(Transaction.objects.filter(user=user).order_by('-date'))
+    live_rates = get_live_rates()
+    target_rate = Decimal(str(live_rates.get(target_currency, 1.0)))
+    
+    for tx in transactions:
+        source_rate = Decimal(str(live_rates.get(tx.currency, 1.0)))
+        tx.converted_amount = round((tx.amount * source_rate) / target_rate, 2)
+        
+    return transactions
 
 

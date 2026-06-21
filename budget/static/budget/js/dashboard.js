@@ -19,28 +19,6 @@ function updateFinancialMetricsUI(metrics, symbol) {
     document.getElementById('expense-display').innerText = `- ${metrics.total_expense} ${symbol}`;
 }
 
-function prependTransactionRowUI(transaction) {
-    const tbody = document.getElementById('transaction-table-body');
-    const txSymbol = currencySymbols[transaction.currency] || '';
-    const typeLabel = transaction.type === 'INCOME' ? '<span class="income">Příjem</span>' : '<span class="expense">Výdaj</span>';
-    
-    // Clear the "No transactions yet" message if it exists
-    if (tbody.rows.length === 1 && tbody.rows[0].cells.length === 1) {
-        tbody.innerHTML = '';
-    }
-
-    const newRow = `
-        <tr>
-            <td>${transaction.date}</td>
-            <td>${typeLabel}</td>
-            <td>${transaction.amount} ${txSymbol}</td>
-            <td>${transaction.category}</td>
-            <td>${transaction.description}</td>
-        </tr>
-    `;
-    tbody.insertAdjacentHTML('afterbegin', newRow);
-}
-
 function refreshAchievementsUI() {
     // Look here! We use the URL from the HTML Bridge
     fetch(DjangoUrls.getAchievements)
@@ -64,12 +42,13 @@ document.getElementById('id_currency').addEventListener('change', function() {
     const selectedCurrency = this.value;
     const symbol = currencySymbols[selectedCurrency] || '';
 
-    // Look here! Using DjangoUrls.changeCurrency
     fetch(`${DjangoUrls.changeCurrency}?currency=${selectedCurrency}`)
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
             updateFinancialMetricsUI(data.metrics, symbol);
+
+            document.getElementById('transaction-table-body').innerHTML = data.table_html;
             
             // Update URL silently without refreshing
             const url = new URL(window.location);
@@ -100,7 +79,7 @@ document.getElementById('transaction-form').addEventListener('submit', function(
     .then(data => {
         if (data.status === 'success') {
             updateFinancialMetricsUI(data.metrics, dashboardSymbol);
-            prependTransactionRowUI(data.transaction);
+            document.getElementById('transaction-table-body').innerHTML = data.table_html;
             refreshAchievementsUI();
             form.reset();
         } else {

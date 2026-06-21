@@ -78,31 +78,7 @@
                 </tr>
             </thead>
             <tbody id="transaction-table-body">
-                {% for tx in transactions %}
-                <tr>
-                    <td>{{ tx.date|date:"d. m. Y" }}</td>
-                    <td>
-                        {% if tx.transaction_type == 'INCOME' %}
-                            <span class="income">Příjem</span>
-                        {% else %}
-                            <span class="expense">Výdaj</span>
-                        {% endif %}
-                    </td>
-                    <td> 
-                        {{ tx.amount }} 
-                        {% if tx.currency == 'CZK' %}Kč
-                        {% elif tx.currency == 'USD' %}$
-                        {% elif tx.currency == 'EUR' %}€
-                        {% endif %}
-                    </td>
-                    <td>{{ tx.get_category_display }}</td>
-                    <td>{{ tx.description }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" style="text-align: center; color: #7f8c8d;">Zatím zde nejsou žádné transakce. Zadejte svou první výše!</td>
-                </tr>
-                {% endfor %}
+                {% include 'budget/partials/transaction_table.html' %}
             </tbody>
         </table>
     </div>
@@ -119,6 +95,6 @@
         };
     </script>
 
-    <script src="{% static 'budget/js/dashboard.js' %}"></script>
+    <script src="{% static 'budget/js/dashboard.js' %}?v=2"></script>
 </body>
 </html>
