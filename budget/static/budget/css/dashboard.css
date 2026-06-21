@@ -439,13 +439,13 @@ tr:hover td {
 
 /* Column Sizing */
 .col-delete   { width: 0%; } 
-.col-edit     { width: 5%; }
-.col-date     { width: 10%; }
-.col-type     { width: 6%; }
-.col-amount   { width: 15%; }
-.col-category { width: 10%; }
+.col-edit     { width: 4%; }
+.col-date     { width: 12%; }
+.col-type     { width: 12%; }
+.col-amount   { width: 12%; }
+.col-category { width: 12%; }
 .col-desc { 
-    width: 64%; 
+    width: 48%; 
     white-space: normal;       /* Allows text to wrap to new lines */
     word-break: break-all;     /* Forces long strings to break */
     overflow-wrap: break-word; /* Ensures words break at edges */
