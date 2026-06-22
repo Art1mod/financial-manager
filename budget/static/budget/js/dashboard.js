@@ -7,6 +7,13 @@ const currencySymbols = { 'CZK': 'Kč', 'USD': '$', 'EUR': '€' };
 // 2. SHARED RENDERERS (Centralized UI Logic)
 // ==========================================
 
+function switchView(panelId, tabButton) {
+    document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('panel-visible'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active-tab'));
+    document.getElementById(panelId).classList.add('panel-visible');
+    tabButton.classList.add('active-tab');
+}
+
 function refreshDashboardUI(data, symbol) {
     // 1. Update Financials
     document.getElementById('balance-display').innerText = `${data.metrics.current_balance.toFixed(2)} ${symbol}`;
