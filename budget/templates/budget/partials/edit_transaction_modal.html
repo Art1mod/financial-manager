@@ -1,0 +1,16 @@
+<div id="edit-modal" class="modal">
+    <div class="modal-content">
+        <h3>Upravit transakci</h3>
+        <form id="edit-transaction-form">
+            {% csrf_token %}
+            <input type="hidden" id="edit-transaction-id" name="id">
+            
+            <div id="edit-form-container"></div>
+            
+            <div class="modal-actions">
+                <button type="button" class="form-control btn-cancel" onclick="closeEditModal()">Zrušit</button>
+                <button type="submit" class="form-control btn-save">Uložit změny</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,44 @@
+/* Dashboard data summaries */
+.card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.mini-card {
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem; 
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    display: inline-block;
+    min-width: 300px;
+}
+
+.summary-box {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #4a4a4a;
+}
+
+.card h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* Metric color maps */
+.balance { color: #0a192f; }
+.income { color: #0f766e; }
+.expense { color: #dc2626; }

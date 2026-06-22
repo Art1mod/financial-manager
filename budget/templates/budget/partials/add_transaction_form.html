@@ -1,0 +1,25 @@
+<div class="card form-card">
+    <h3>Nová transakce</h3>
+    <form method="post" id="transaction-form">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            {% if field.name == 'description' %}
+                <div class="form-row">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    <div>
+                        {{ field }}
+                        <small id="char-counter">0 / 255 znaků</small>
+                    </div>
+                </div>
+            {% else %}
+                <div class="form-row">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                </div>
+            {% endif %}
+        {% endfor %}
+        
+        <button type="submit">Uložit transakci</button>
+    </form>
+</div>

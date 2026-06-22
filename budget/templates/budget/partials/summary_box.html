@@ -1,0 +1,22 @@
+<div class="summary-box">
+    <div class="card">
+        <h3>Aktuální bilance</h3>
+        <h2 class="balance" id="balance-display">
+            {{ current_balance }} {% if selected_currency == 'CZK' %}Kč{% elif selected_currency == 'USD' %}${% elif selected_currency == 'EUR' %}€{% endif %}
+        </h2>
+    </div>
+
+    <div class="card">
+        <h3>Celkové příjmy</h3>
+        <h2 class="income" id="income-display">
+            + {{ total_income }} {% if selected_currency == 'CZK' %}Kč{% elif selected_currency == 'USD' %}${% elif selected_currency == 'EUR' %}€{% endif %}
+        </h2>
+    </div>
+
+    <div class="card">
+        <h3>Celkové výdaje</h3>
+        <h2 class="expense" id="expense-display">
+            - {{ total_expense }} {% if selected_currency == 'CZK' %}Kč{% elif selected_currency == 'USD' %}${% elif selected_currency == 'EUR' %}€{% endif %}
+        </h2>
+    </div>
+</div>

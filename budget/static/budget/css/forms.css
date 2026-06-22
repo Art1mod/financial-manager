@@ -1,0 +1,174 @@
+/* Intake structure controls */
+.form-card {
+    padding: 2rem;
+    margin-top: 2rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 800px;
+}
+
+#transaction-form {
+    margin-top: 1rem;
+}
+
+#transaction-form p, 
+.form-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    align-items: start;
+    margin-bottom: 1.25rem;
+}
+
+#transaction-form label, 
+.form-group label {
+    font-weight: 700;
+    color: #0a192f;
+    font-size: 0.9rem;
+    padding-top: 0.8rem;
+}
+
+/* Inputs and interactive states */
+.form-control, 
+#transaction-form input, 
+#transaction-form select, 
+#transaction-form textarea { 
+    padding: 0.8rem;
+    border: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    font-size: 0.95rem;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+    display: block;
+    transition: border-color 0.2s ease;
+}
+
+#transaction-form textarea {
+    max-width: 550px;
+    height: 150px;       
+    min-height: 100px;   
+    max-height: 200px;   
+    resize: vertical;    
+}
+
+.form-control:focus, 
+#transaction-form input:focus, 
+#transaction-form select:focus, 
+#transaction-form textarea:focus,
+#edit-form-container input:focus,
+#edit-form-container select:focus,
+#edit-form-container textarea:focus {
+    outline: none;
+    border-color: #0a192f;
+}
+
+#char-counter {
+    display: block;
+    color: #7f8c8d;
+    margin-top: 5px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+#transaction-form button[type="submit"] {
+    background: #06122b;
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#transaction-form button[type="submit"]:hover {
+    background: #0f2b67;
+}
+
+/* Modal layout panels */
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5); 
+    display: none;
+    z-index: 1000;
+}
+
+.modal.show {
+    display: block !important;
+}
+
+.modal-content {
+    background: #ffffff;
+    margin: 5% auto;
+    padding: 2rem;
+    width: 450px;       
+    max-width: 90%;     
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    overflow: hidden; 
+}
+
+#edit-form-container label {
+    display: block;
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+#edit-form-container input, 
+#edit-form-container select, 
+#edit-form-container textarea {
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+}
+
+#edit-form-container textarea {
+    min-height: 100px;
+    max-height: 200px;
+    resize: vertical;
+    word-break: break-word; 
+}
+
+/* Modal action buttons container */
+.modal-actions {
+    text-align: right; 
+    margin-top: 1.5rem; 
+    display: flex; 
+    gap: 0.5rem; 
+    justify-content: flex-end;
+}
+
+/* Modal specific button overrides */
+.btn-cancel {
+    background: #cbd5e1; 
+    color: #334155;
+    border: none; 
+    cursor: pointer; 
+    font-weight: 600;
+}
+
+.btn-cancel:hover {
+    background: #94a3b8;
+}
+
+.btn-save {
+    background: #0a192f; 
+    color: #ffffff; 
+    border: none; 
+    cursor: pointer; 
+    font-weight: 600;
+}
+
+.btn-save:hover {
+    background: #0f2b67;
+}

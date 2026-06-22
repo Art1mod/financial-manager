@@ -7,7 +7,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Finance Manager - Dashboard</title>
-    <link rel="stylesheet" href="{% static 'budget/css/dashboard.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'budget/css/layout.css' %}?v=6">
+    <link rel="stylesheet" href="{% static 'budget/css/cards.css' %}?v=6">
+    <link rel="stylesheet" href="{% static 'budget/css/forms.css' %}?v=6">
+    <link rel="stylesheet" href="{% static 'budget/css/tables.css' %}?v=6">
+    <link rel="stylesheet" href="{% static 'achievements/css/achievements.css' %}?v=6">
 </head>
 <body>
 
@@ -25,9 +29,10 @@
     </div>
 
     <div id="dashboard-view" class="view-panel panel-visible">
-    <div id="dynamic-achievements-wrapper">
-        {% include 'achievements/recent_achievements_widget.html' %}
-    </div>
+        
+        <div id="dynamic-achievements-wrapper">
+            {% include 'achievements/recent_achievements_widget.html' %}
+        </div>
 
         <div class="card mini-card">
             <div class="form-group form-row" style="margin-bottom: 0;">
@@ -40,52 +45,9 @@
             </div>
         </div>
 
-        <div class="summary-box">
-            <div class="card">
-                <h3>Aktuální bilance</h3>
-                <h2 class="balance" id="balance-display">
-                    {{ current_balance }} {% if selected_currency == 'CZK' %}Kč{% elif selected_currency == 'USD' %}${% elif selected_currency == 'EUR' %}€{% endif %}
-                </h2>
-            </div>
-            <div class="card">
-                <h3>Celkové příjmy</h3>
-                <h2 class="income" id="income-display">
-                    + {{ total_income }} {% if selected_currency == 'CZK' %}Kč{% elif selected_currency == 'USD' %}${% elif selected_currency == 'EUR' %}€{% endif %}
-                </h2>
-            </div>
-            <div class="card">
-                <h3>Celkové výdaje</h3>
-                <h2 class="expense" id="expense-display">
-                    - {{ total_expense }} {% if selected_currency == 'CZK' %}Kč{% elif selected_currency == 'USD' %}${% elif selected_currency == 'EUR' %}€{% endif %}
-                </h2>
-            </div>
-        </div>
+        {% include 'budget/partials/summary_box.html' %}
 
-        <div class="card form-card">
-            <h3>Nová transakce</h3>
-            <form method="post" id="transaction-form">
-                {% csrf_token %}
-                
-                {% for field in form %}
-                    {% if field.name == 'description' %}
-                        <p class="form-row">
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            <div>
-                                {{ field }}
-                                <small id="char-counter">0 / 255 znaků</small>
-                            </div>
-                        </p>
-                    {% else %}
-                        <p>
-                            {{ field.label_tag }}
-                            {{ field }}
-                        </p>
-                    {% endif %}
-                {% endfor %}
-                
-                <button type="submit">Uložit transakci</button>
-            </form>
-        </div>
+        {% include 'budget/partials/add_transaction_form.html' %}
 
         <h3>Historie transakcí</h3>
         <table>
@@ -105,22 +67,11 @@
             </tbody>
         </table>
 
-        <div id="edit-modal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <h3>Upravit transakci</h3>
-                <form id="edit-transaction-form">
-                    {% csrf_token %}
-                    <input type="hidden" id="edit-transaction-id" name="id">
-                    <div id="edit-form-container"></div>
-                    <button type="button" onclick="closeEditModal()">Zrušit</button>
-                    <button type="submit">Uložit změny</button>
-                </form>
-            </div>
-        </div>
+        {% include 'budget/partials/edit_transaction_modal.html' %}
     </div>
 
     <div id="achievements-view" class="view-panel">
-    {% render_user_achievements user %}
+        {% render_user_achievements user %}
     </div>
 
     <script>
@@ -129,11 +80,9 @@
             addTransaction: "{% url 'add_transaction_ajax' %}",
             getAchievements: "{% url 'get_achievements' %}"
         };
-    </script>
-    <script>
         const incomeCats = JSON.parse(document.getElementById('income-cats').textContent);
         const expenseCats = JSON.parse(document.getElementById('expense-cats').textContent);
     </script>
-    <script src="{% static 'budget/js/dashboard.js' %}?v=3"></script>
+    <script src="{% static 'budget/js/dashboard.js' %}?v=6"></script>
 </body>
 </html>

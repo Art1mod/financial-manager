@@ -1,0 +1,100 @@
+/* --- 1. RECENT ACHIEVEMENTS WIDGET (TOP BANNER) --- */
+.recent-achievements-banner {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.recent-achievements-banner h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #7f8c8d;
+}
+
+.mini-achievements-grid {
+    display: flex;
+    gap: 1rem;
+}
+
+.mini-achievement-card {
+    background-color: #f0fdfa; /* Light mint background */
+    border: 1px solid #0f766e; /* Dark teal border */
+    padding: 0.75rem 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.mini-achievement-card h5 {
+    margin: 0 0 4px 0;
+    font-size: 0.95rem;
+    color: #0a192f;
+    font-weight: 700;
+}
+
+.mini-achievement-card p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #4a4a4a;
+}
+
+/* Hide extra items if there are more than 2 */
+.mini-achievements-grid .mini-achievement-card:nth-of-type(n+3) {
+    display: none;
+}
+
+.empty-achievements-text {
+    margin: 0;
+    font-size: 0.9em;
+    color: #7f8c8d;
+}
+
+
+/* --- 2. ALL ACHIEVEMENTS GRID (FULL PANEL) --- */
+.achievements-grid {
+    display: grid;
+    /* This creates the responsive columns automatically */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.achievement-card {
+    padding: 1.5rem;
+    border-radius: 6px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Inactive/Locked Card State */
+.achievement-card.locked {
+    background-color: #f8f9fa;
+    border: 1px solid #cbd5e1;
+    opacity: 0.6;
+}
+
+/* Active/Unlocked Card State */
+.achievement-card.unlocked {
+    background-color: #f0fdfa; /* Light mint background */
+    border: 1px solid #0f766e; /* Dark teal border */
+    opacity: 1;
+    box-shadow: 0 4px 12px rgba(15, 118, 110, 0.04);
+}
+
+.achievement-card h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: #0a192f;
+}
+
+.achievement-desc {
+    margin: 0;
+    font-size: 0.9em;
+    color: #555;
+}
