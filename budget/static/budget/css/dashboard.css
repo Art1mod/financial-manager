@@ -205,6 +205,9 @@ body::after {
    6. RECENT ACHIEVEMENTS (DASHBOARD TAB)
    ========================================================================== */
 
+.achievement-desc { margin: 5px 0 0 0; font-size: 0.9em; color: #555; } 
+.empty-achievements-text { margin: 0; font-size: 0.9em; color: #7f8c8d; }
+
 /* Dashboard top achievements container header panel */
 .recent-achievements-banner {
     background: #fdfdfd;
