@@ -16,7 +16,11 @@ class TransactionForm(forms.ModelForm):
     
     class Meta:
         model = Transaction
-        fields = ['transaction_type', 'category','amount', 'currency', 'description']
+        fields = ['date', 'transaction_type', 'category','amount', 'currency', 'description']
         widgets = {
+            'date': forms.DateInput(
+                format='%Y-%m-%d', 
+                attrs={'type': 'date', 'class': 'form-control'}
+            ),
             'description': forms.Textarea(),
         }

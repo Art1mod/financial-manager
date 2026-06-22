@@ -2,6 +2,7 @@
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 
 class Transaction(models.Model):
     
@@ -35,7 +36,7 @@ class Transaction(models.Model):
     transaction_type = models.CharField(max_length=10, choices=[('INCOME', 'Příjem'), ('EXPENSE', 'Výdaj')])
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     description = models.CharField(max_length=255, blank=True)
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateField(default=now)
     currency = models.CharField(max_length=3, choices=CURRENCY_CHOICES, default='CZK')
 
     def __str__(self):

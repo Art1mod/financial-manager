@@ -25,9 +25,9 @@
     </div>
 
     <div id="dashboard-view" class="view-panel panel-visible">
-        <div class="recent-achievements-banner" id="recent-achievements-container">
-            {% render_recent_achievements user %}
-        </div>
+    <div id="dynamic-achievements-wrapper">
+        {% include 'achievements/recent_achievements_widget.html' %}
+    </div>
 
         <div class="card mini-card">
             <div class="form-group form-row" style="margin-bottom: 0;">

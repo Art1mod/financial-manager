@@ -11,10 +11,13 @@ from django.utils.timezone import localtime
 from django.template.loader import render_to_string
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
+from django.template import Template, Context
+from django.db import transaction
 
 # Local App Imports
 from .models import Transaction
 from .forms import TransactionForm
+from achievements.models import UserAchievement
 from .services import calculate_user_metrics, get_annotated_transactions
 
 def register(request):
@@ -38,6 +41,10 @@ def dashboard(request):
     user_transactions = get_annotated_transactions(request.user, selected_currency)
     metrics = calculate_user_metrics(request.user, selected_currency)
 
+    recent_achievements = UserAchievement.objects.filter(
+        user=request.user
+    ).order_by('-date_unlocked')[:3]
+
     if request.method == 'POST':
         form = TransactionForm(request.POST)
         if form.is_valid():
@@ -57,6 +64,7 @@ def dashboard(request):
         'form': form,
         'INCOME_CATEGORIES': Transaction.INCOME_CATEGORIES,
         'EXPENSE_CATEGORIES': Transaction.EXPENSE_CATEGORIES,
+        'recent_achievements': recent_achievements,
     }
     return render(request, 'budget/dashboard.html', context)
 
@@ -91,22 +99,40 @@ def add_transaction_ajax(request):
     if request.method == 'POST':
         form = TransactionForm(request.POST)
         if form.is_valid():
-            transaction = form.save(commit=False)
-            transaction.user = request.user
-            transaction.save()
+            
+            with transaction.atomic():
+                new_transaction = form.save(commit=False)
+                new_transaction.user = request.user
+                new_transaction.save()
+            
             
             dashboard_currency = request.POST.get('dashboard_currency', 'CZK')
             metrics = calculate_user_metrics(request.user, dashboard_currency)
             user_transactions = get_annotated_transactions(request.user, dashboard_currency)
+
 
             table_html = render_to_string('budget/partials/transaction_table.html', {
                 'transactions': user_transactions,
                 'selected_currency': dashboard_currency
             })
 
+            recent_achievements = UserAchievement.objects.filter(
+                user=request.user
+            ).order_by('-date_unlocked')[:3]
+
+            recent_html = render_to_string(
+                'achievements/recent_achievements_widget.html', 
+                {'recent_achievements': recent_achievements}
+            )
+            
+            template = Template("{% load gamification_tags %}{% render_user_achievements user %}")
+            all_html = template.render(Context({'user': request.user}))
+
             return JsonResponse({
                 'status': 'success',
                 'table_html': table_html, 
+                'recent_html': recent_html,
+                'all_html': all_html,
                 'metrics': {
                     'total_income': float(metrics['total_income']),
                     'total_expense': float(metrics['total_expense']),
@@ -120,7 +146,6 @@ def add_transaction_ajax(request):
 @require_POST
 @login_required
 def delete_transaction_ajax(request, transaction_id):
-    
     transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
     transaction.delete()
     
@@ -133,29 +158,29 @@ def delete_transaction_ajax(request, transaction_id):
         'selected_currency': dashboard_currency
     })
     
+    recent_achievements = UserAchievement.objects.filter(
+        user=request.user
+    ).order_by('-date_unlocked')[:3]
+
+    recent_html = render_to_string(
+        'achievements/recent_achievements_widget.html', 
+        {'recent_achievements': recent_achievements}
+    )
+            
+    template = Template("{% load gamification_tags %}{% render_user_achievements user %}")
+    all_html = template.render(Context({'user': request.user}))
+
     return JsonResponse({
         'status': 'success',
-        'table_html': table_html,
+        'table_html': table_html, 
+        'recent_html': recent_html,
+        'all_html': all_html,
         'metrics': {
             'total_income': float(metrics['total_income']),
             'total_expense': float(metrics['total_expense']),
             'current_balance': float(metrics['current_balance']),
         }
     })
-
-@require_POST
-@login_required
-def edit_transaction_ajax(request, transaction_id):
-    transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
-    field = request.POST.get('field')  # e.g., 'amount', 'category', 'description'
-    value = request.POST.get('value')
-
-    if hasattr(transaction, field):
-        setattr(transaction, field, value)
-        transaction.save()
-        # Return updated table and metrics just like your delete view
-        return JsonResponse({'status': 'success'})
-    return JsonResponse({'status': 'error'}, status=400)
 
 @login_required
 def get_transaction_details(request, transaction_id):
@@ -166,24 +191,40 @@ def get_transaction_details(request, transaction_id):
 
 @login_required
 def update_transaction_ajax(request, transaction_id):
-    transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
+    transaction_obj = get_object_or_404(Transaction, id=transaction_id, user=request.user)
     if request.method == 'POST':
-        form = TransactionForm(request.POST, instance=transaction)
+        form = TransactionForm(request.POST, instance=transaction_obj)
         if form.is_valid():
-            form.save()
             
-            # RE-CALCULATE AND RENDER (Just like in add/delete views)
+            with transaction.atomic():
+                form.save()
+            
             dashboard_currency = request.POST.get('dashboard_currency', 'CZK')
             metrics = calculate_user_metrics(request.user, dashboard_currency)
             user_transactions = get_annotated_transactions(request.user, dashboard_currency)
+            
             table_html = render_to_string('budget/partials/transaction_table.html', {
                 'transactions': user_transactions,
                 'selected_currency': dashboard_currency
             })
             
+            recent_achievements = UserAchievement.objects.filter(
+                user=request.user
+            ).order_by('-date_unlocked')[:3]
+
+            recent_html = render_to_string(
+                'achievements/recent_achievements_widget.html', 
+                {'recent_achievements': recent_achievements}
+            )
+            
+            template = Template("{% load gamification_tags %}{% render_user_achievements user %}")
+            all_html = template.render(Context({'user': request.user}))
+
             return JsonResponse({
                 'status': 'success',
-                'table_html': table_html,
+                'table_html': table_html, 
+                'recent_html': recent_html,
+                'all_html': all_html,
                 'metrics': {
                     'total_income': float(metrics['total_income']),
                     'total_expense': float(metrics['total_expense']),
@@ -191,3 +232,4 @@ def update_transaction_ajax(request, transaction_id):
                 }
             })
         return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)

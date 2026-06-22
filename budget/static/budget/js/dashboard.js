@@ -19,18 +19,16 @@ function updateFinancialMetricsUI(metrics, symbol) {
     document.getElementById('expense-display').innerText = `- ${metrics.total_expense.toFixed(2)} ${symbol}`;
 }
 
-function refreshAchievementsUI() {
-    // Look here! We use the URL from the HTML Bridge
-    fetch(DjangoUrls.getAchievements)
-    .then(response => response.json())
-    .then(achData => {
-        const achievementsView = document.getElementById('achievements-view');
-        const recentBanner = document.getElementById('recent-achievements-container');
-        
-        if (achievementsView) achievementsView.innerHTML = achData.all_html;
-        if (recentBanner) recentBanner.outerHTML = achData.recent_html;
-    })
-    .catch(err => console.error("Error fetching achievements:", err));
+function syncAchievements(data) {
+    const recentWrapper = document.getElementById('dynamic-achievements-wrapper');
+    if (recentWrapper && data.recent_html) {
+        recentWrapper.innerHTML = data.recent_html;
+    }
+    
+    const allView = document.getElementById('achievements-view');
+    if (allView && data.all_html) {
+        allView.innerHTML = data.all_html;
+    }
 }
 
 function deleteTransaction(transactionId) {
@@ -49,6 +47,7 @@ function deleteTransaction(transactionId) {
     .then(data => {
         if (data.status === 'success') {
             updateFinancialMetricsUI(data.metrics, symbol);
+            syncAchievements(data); 
             document.getElementById('transaction-table-body').innerHTML = data.table_html;
         } else {
             alert('Chyba při mazání.');
@@ -185,8 +184,9 @@ document.getElementById('edit-transaction-form').addEventListener('submit', func
     .then(response => response.json())
     .then(data => {
         if (data.status === 'success') {
-            document.getElementById('transaction-table-body').innerHTML = data.table_html;
             updateFinancialMetricsUI(data.metrics, currencySymbols[activeCurrency]);
+            syncAchievements(data); 
+            document.getElementById('transaction-table-body').innerHTML = data.table_html;
             closeEditModal();
         } else {
             alert('Chyba: ' + JSON.stringify(data.errors));
@@ -240,8 +240,8 @@ document.getElementById('transaction-form').addEventListener('submit', function(
     .then(data => {
         if (data.status === 'success') {
             updateFinancialMetricsUI(data.metrics, dashboardSymbol);
+            syncAchievements(data); 
             document.getElementById('transaction-table-body').innerHTML = data.table_html;
-            refreshAchievementsUI();
             form.reset();
         } else {
             alert('Chyba při ukládání transakce: ' + JSON.stringify(data.errors));

@@ -342,7 +342,11 @@ body::after {
 }
 
 /* Universal input/select/textarea styling */
-.form-control, #transaction-form input, #transaction-form select, #transaction-form textarea { 
+.form-control, #transaction-form input, 
+#transaction-form input[type="number"], 
+#transaction-form input[type="date"], 
+#transaction-form select, 
+#transaction-form textarea { 
     padding: 0.8rem;
     border: 1px solid #e5e7eb;
     background-color: #ffffff;
