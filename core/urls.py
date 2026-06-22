@@ -18,35 +18,31 @@ from django.contrib import admin
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
-from budget.views import (
-    dashboard, 
-    register, 
-    change_currency_ajax, 
-    add_transaction_ajax, 
-    delete_transaction_ajax,
-    update_transaction_ajax,        
-    get_transaction_details         
-)
-from achievements.views import get_achievements_ajax
+
+# Group your imports by app to keep them tidy
+from budget import views as budget_views
+from achievements import views as achievement_views
 
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
     
-    #  Route the landing root path directly to dashboard layout page
+    # Landing
     path('', RedirectView.as_view(url='dashboard/', permanent=False)),
-    path('get-achievements/', get_achievements_ajax, name='get_achievements'),
     
-    #  Authentication Routing Points
+    # Auth
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
-    path('register/', register, name='register'),
+    path('register/', budget_views.register, name='register'),
     
-    #  Application Workspace Infrastructure
-    path('dashboard/', dashboard, name='dashboard'),
-    path('add-transaction-ajax/', add_transaction_ajax, name='add_transaction_ajax'),
-    path('change-currency-ajax/', change_currency_ajax, name='change_currency_ajax'),
-
-    path('delete-transaction/<int:transaction_id>/', delete_transaction_ajax, name='delete_transaction_ajax'),
-    path('get-transaction/<int:transaction_id>/', get_transaction_details, name='get_transaction_details'),
-    path('update-transaction/<int:transaction_id>/', update_transaction_ajax, name='update_transaction_ajax'),
+    # Budget Workspace
+    path('dashboard/', budget_views.dashboard, name='dashboard'),
+    path('add-transaction-ajax/', budget_views.add_transaction_ajax, name='add_transaction_ajax'),
+    path('change-currency-ajax/', budget_views.change_currency_ajax, name='change_currency_ajax'),
+    path('delete-transaction/<int:transaction_id>/', budget_views.delete_transaction_ajax, name='delete_transaction_ajax'),
+    path('get-transaction/<int:transaction_id>/', budget_views.get_transaction_details, name='get_transaction_details'),
+    path('update-transaction/<int:transaction_id>/', budget_views.update_transaction_ajax, name='update_transaction_ajax'),
+    
+    # Achievements
+    path('get-achievements/', achievement_views.get_achievements_ajax, name='get_achievements'),
 ]
