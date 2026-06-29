@@ -6,8 +6,9 @@ from budget.models import Transaction
 from .models import Achievement, UserAchievement
 from django.utils import timezone
 from datetime import timedelta
+from django.test import TransactionTestCase
 
-class BudgetAppTestCase(TestCase):
+class BudgetAppTestCase(TransactionTestCase):
 
     def setUp(self):
         """Sets up a clean testing environment and creates all required achievements."""
@@ -38,6 +39,7 @@ class BudgetAppTestCase(TestCase):
         Uses .update() to bypass auto_now_add and avoid triggering signals prematurely.
         """
         tx = Transaction.objects.create(user=self.user, amount=amount, transaction_type=t_type, category='OTHER')
+    
         target_date = timezone.now() - timedelta(days=days_ago)
         Transaction.objects.filter(id=tx.id).update(date=target_date)
         return tx
@@ -51,17 +53,17 @@ class BudgetAppTestCase(TestCase):
     # ==========================================
     def test_balance_milestones(self):
         # Add 1,500
-        Transaction.objects.create(user=self.user, amount=1500, transaction_type='INCOME', category='OTHER')
+        Transaction.objects.create(user=self.user, amount=1500, transaction_type='INCOME', category='OTHER_INC')
         self.assertTrue(self.has_achievement(self.ach_1000))
         self.assertFalse(self.has_achievement(self.ach_10000))
 
         # Add 9,000 (Total 10,500)
-        Transaction.objects.create(user=self.user, amount=9000, transaction_type='INCOME', category='OTHER')
+        Transaction.objects.create(user=self.user, amount=9000, transaction_type='INCOME', category='OTHER_INC')
         self.assertTrue(self.has_achievement(self.ach_10000))
         self.assertFalse(self.has_achievement(self.ach_100000))
 
         # Add 90,000 (Total 100,500)
-        Transaction.objects.create(user=self.user, amount=90000, transaction_type='INCOME', category='OTHER')
+        Transaction.objects.create(user=self.user, amount=90000, transaction_type='INCOME', category='OTHER_INC')
         self.assertTrue(self.has_achievement(self.ach_100000))
 
     # ==========================================
@@ -70,18 +72,18 @@ class BudgetAppTestCase(TestCase):
     def test_volume_milestones(self):
         # Create 9 transactions
         for _ in range(9):
-            Transaction.objects.create(user=self.user, amount=10, transaction_type='INCOME', category='OTHER')
+            Transaction.objects.create(user=self.user, amount=10, transaction_type='INCOME', category='OTHER_INC')
         
         self.assertFalse(self.has_achievement(self.ach_10))
 
         # 10th transaction
-        Transaction.objects.create(user=self.user, amount=10, transaction_type='INCOME', category='OTHER')
+        Transaction.objects.create(user=self.user, amount=10, transaction_type='INCOME', category='OTHER_INC')
         self.assertTrue(self.has_achievement(self.ach_10))
         self.assertFalse(self.has_achievement(self.ach_50))
 
         # Add 40 more (Total 50)
         for _ in range(40):
-            Transaction.objects.create(user=self.user, amount=10, transaction_type='INCOME', category='OTHER')
+            Transaction.objects.create(user=self.user, amount=10, transaction_type='INCOME', category='OTHER_INC')
         self.assertTrue(self.has_achievement(self.ach_50))
         self.assertFalse(self.has_achievement(self.ach_100))
 
@@ -103,7 +105,7 @@ class BudgetAppTestCase(TestCase):
         self.assertFalse(self.has_achievement(self.ach_5_streak))
 
         # Trigger the evaluation by creating a transaction TODAY
-        Transaction.objects.create(user=self.user, amount=100, transaction_type='INCOME', category='OTHER')
+        Transaction.objects.create(user=self.user, amount=100, transaction_type='INCOME', category='OTHER_INC')
 
         # User now has 5 days in a row (today, -1, -2, -3, -4)
         self.assertTrue(self.has_achievement(self.ach_3_streak))
@@ -118,7 +120,7 @@ class BudgetAppTestCase(TestCase):
 
         # Add an income today. This should trigger the check.
         # Since 8 days have passed since the last expense, both badges should unlock.
-        Transaction.objects.create(user=self.user, amount=100, transaction_type='INCOME', category='OTHER')
+        Transaction.objects.create(user=self.user, amount=100, transaction_type='INCOME', category='OTHER_INC')
         
         self.assertTrue(self.has_achievement(self.ach_no_exp_3))
         self.assertTrue(self.has_achievement(self.ach_no_exp_7))
@@ -128,7 +130,7 @@ class BudgetAppTestCase(TestCase):
         self.create_historical_transaction(2, 500, t_type='EXPENSE')
 
         # Add an income today. 
-        Transaction.objects.create(user=self.user, amount=100, transaction_type='INCOME', category='OTHER')
+        Transaction.objects.create(user=self.user, amount=100, transaction_type='INCOME', category='OTHER_INC')
         
         # Only 2 days have passed, so no badges should unlock
         self.assertFalse(self.has_achievement(self.ach_no_exp_3))

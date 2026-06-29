@@ -74,4 +74,5 @@ def evaluate_achievements_on_transaction(sender, instance, created, **kwargs):
             if days_active >= 7: unlock('no_expense_7_days')
 
     # Execute only after the database save is firmly committed
-    transaction.on_commit(check_achievements)
+    transaction.on_commit(check_achievements) 
+    

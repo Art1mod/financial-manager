@@ -4,6 +4,7 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from .models import Transaction
 from .forms import TransactionForm
+from django.utils.timezone import now
 
 class BudgetAppTestCase(TestCase):
 
@@ -18,11 +19,13 @@ class BudgetAppTestCase(TestCase):
         form_data = {
             'amount': '250.50',
             'transaction_type': 'INCOME',
-            'category': 'OTHER',
+            'category': 'OTHER_INC',
             'description': 'Kapesné od babičky',
             'currency': 'CZK',
+            'date': now().date(),
         }
         form = TransactionForm(data=form_data)
+        print(form.errors)
         self.assertTrue(form.is_valid(), "The form should be valid when all correct parameters are supplied.")
 
     def test_transaction_form_invalid_data(self):
@@ -39,7 +42,7 @@ class BudgetAppTestCase(TestCase):
     def test_financial_math_calculations(self):
         """Verifies that income and expense aggregations yield correct mathematical balances."""
         
-        Transaction.objects.create(user=self.user, amount=10000.00, transaction_type='INCOME', category='OTHER')
+        Transaction.objects.create(user=self.user, amount=10000.00, transaction_type='INCOME', category='OTHER_INC')
         Transaction.objects.create(user=self.user, amount=2000.00, transaction_type='EXPENSE', category='FOOD')
 
         user_txs = Transaction.objects.filter(user=self.user)
